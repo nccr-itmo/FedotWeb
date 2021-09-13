@@ -6,6 +6,7 @@ from werkzeug.contrib.fixers import ProxyFix
 from app import create_app, db, socketio
 
 if __name__ == "__main__":
+    load_dotenv("local.env")
     load_dotenv("oauth.env")
     load_dotenv("mongo_conn_string.env")
 
