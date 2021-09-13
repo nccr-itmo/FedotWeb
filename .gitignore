@@ -1,0 +1,11 @@
+# env
+venv
+
+# debug
+launch.json
+
+# cache
+__pycache__
+
+# build
+**/build
