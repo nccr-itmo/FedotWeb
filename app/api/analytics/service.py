@@ -48,9 +48,9 @@ def _make_chart_dicts(
 
     for i in range(len(ys)):
         if plot_type == 'line':
-            data = [round(_, 3) for _ in ys[i]]
+            data: List[int] = [round(_, 3) for _ in ys[i]]
         else:
-            data = [[x[j], round(ys[i][j], 3)] for j in range(len(ys[i]))]
+            data: List[List[int]] = [[x[j], round(ys[i][j], 3)] for j in range(len(ys[i]))]
 
         series.append({
             'name': names[i],
