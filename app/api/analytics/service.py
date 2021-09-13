@@ -13,10 +13,12 @@ from .models import BoxPlotData, PlotData
 
 max_items_in_plot: int = 50
 
+# TODO: make typings file
+Integral = Union[int, float]
 
 def _make_chart_dicts_for_boxplot(
     x: List[int],
-    ys: List[List[int]],
+    ys: List[List[Integral]],
     x_title: str, y_title: str
 ) -> List[Dict[str, Union[str, int, list]]]:
     series: List[Dict[str, Union[str, int, list]]] = []
@@ -35,7 +37,7 @@ def _make_chart_dicts_for_boxplot(
 
 def _make_chart_dicts(
     x: List[int],
-    ys: List[List[int]],
+    ys: List[List[Integral]],
     names: List[str],
     x_title: str, y_title: str, plot_type: str, y_bnd=None
 ) -> Tuple[
@@ -56,8 +58,8 @@ def _make_chart_dicts(
         })
 
     if not y_bnd:
-        min_y: int = min([min(y) for y in ys]) * 0.95
-        max_y: int = max([max(y) for y in ys]) * 1.05
+        min_y: float = min([min(y) for y in ys]) * 0.95
+        max_y: float = max([max(y) for y in ys]) * 1.05
     else:
         min_y, max_y = y_bnd
 
@@ -100,9 +102,9 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
     history: OptHistory = composer_history_for_case(case_id)
 
     if analytic_type == 'pheno':
-        y_gen: List[List[int]] = [[abs(i.fitness) for i in gen] for gen in history.individuals]
+        y_gen: List[List[Integral]] = [[abs(i.fitness) for i in gen] for gen in history.individuals]
     elif analytic_type == 'geno':
-        y_gen: List[List[int]] = [[abs(i.graph.depth) for i in gen] for gen in history.individuals]
+        y_gen: List[List[Integral]] = [[abs(i.graph.depth) for i in gen] for gen in history.individuals]
     else:
         raise ValueError(f'Analytic type {analytic_type} not recognized')
 
@@ -153,18 +155,18 @@ def get_modelling_results(
 
     if case.metadata.task_name == 'ts_forecasting':
         plot_type: str = 'line'
-        y: List[int] = list(prediction.predict[0, :])
-        y_baseline: Optional[List[int]] = list(baseline_prediction.predict[0, :]) if baseline_prediction else None
+        y: List[Integral] = list(prediction.predict[0, :])
+        y_baseline: Optional[List[Integral]] = list(baseline_prediction.predict[0, :]) if baseline_prediction else None
 
     else:
         plot_type: str = 'scatter'
-        y: List[int] = prediction.predict.tolist()
-        y_baseline: Optional[List[int]] = baseline_prediction.predict.tolist() if baseline_prediction else None
+        y: List[Integral] = prediction.predict.tolist()
+        y_baseline: Optional[List[Integral]] = baseline_prediction.predict.tolist() if baseline_prediction else None
 
     x: List[int] = list(range(len(prediction.predict)))
     x = x[:max_items_in_plot]
-    y: List[int] = y[:max_items_in_plot]
-    ys: List[List[int]] = [y]
+    y = y[:max_items_in_plot]
+    ys: List[List[Integral]] = [y]
     names: List[str] = ['Candidate']
     if baseline_prediction:
         y_baseline = y_baseline[:max_items_in_plot]
