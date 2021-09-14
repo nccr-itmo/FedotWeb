@@ -76,3 +76,53 @@ def test_make_chart_dicts_for_boxplot(case: InputCase):
         for idx, y in enumerate(case.ys)
     ]
     assert sorted(result, key=lambda dct: dct.keys()) == sorted(etalon, key=lambda dct: dct.keys())
+
+
+@pytest.mark.parametrize("case", InputCases)
+def test_make_chart_dicts(case: InputCase):
+    plot_types = ['line', 'other']
+    for plot_type in plot_types:
+        result_series, result_options = _make_chart_dicts(
+            x=case.x,
+            ys=case.ys,
+            names=case.names,
+            x_title=case.x_title,
+            y_title=case.y_title,
+            plot_type=plot_type,
+            y_bnd=case.y_bnd
+        )
+        etalon_series = [
+            {
+                'name': case.names[idx1],
+                'data':
+                    [round(_, 3) for _ in y]
+                    if plot_type == "line"
+                    else [[case.x[idx2], round(_, 3)] for idx2, _ in enumerate(y)]
+            }
+            for idx1, y in enumerate(case.ys)
+        ]
+        if not case.y_bnd:
+            min_y: float = min(min(y) for y in case.ys) * 0.95
+            max_y: float = max(max(y) for y in case.ys) * 1.05
+        else:
+            min_y, max_y = case.y_bnd
+        etalon_options = {
+            'chart': {
+                'type': plot_type
+            },
+            'xaxis': {
+                'categories': case.x,
+                'title': {
+                    'text': case.x_title
+                }
+            },
+            'yaxis': {
+                'title': {
+                    'text': case.y_title
+                },
+                'min': min_y,
+                'max': max_y
+            }
+        }
+    assert result_series == etalon_series, "Series aren't equal"
+    assert result_options == etalon_options, "Options aren't equal"
