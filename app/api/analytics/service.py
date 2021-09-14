@@ -41,22 +41,23 @@ def _make_chart_dicts(
     List[Dict[str, Union[str, List[Integral], List[List[Union[int, Integral]]]]]],
     Dict[str, Dict[str, Any]]
 ]:
-    series: List[Dict[str, Union[str, List[Integral], List[List[Union[int, Integral]]]]]] = []
-
-    for i in range(len(ys)):
-        if plot_type == 'line':
-            data: List[Integral] = [round(_, 3) for _ in ys[i]]
-        else:
-            data: List[List[Union[int, Integral]]] = [[x[j], round(ys[i][j], 3)] for j in range(len(ys[i]))]
-
-        series.append({
-            'name': names[i],
-            'data': data
-        })
+    series: List[Dict[
+        str,
+        Union[str, List[Integral], List[List[Union[int, Integral]]]]
+    ]] = [
+        {
+            'name': names[idx1],
+            'data':
+                [round(_, 3) for _ in y]
+                if plot_type == "line"
+                else [[x[idx2], round(_, 3)] for idx2, _ in enumerate(y)]
+        }
+        for idx1, y in enumerate(ys)
+    ]
 
     if not y_bnd:
-        min_y: float = min([min(y) for y in ys]) * 0.95
-        max_y: float = max([max(y) for y in ys]) * 1.05
+        min_y: float = min(min(y) for y in ys) * 0.95
+        max_y: float = max(max(y) for y in ys) * 1.05
     else:
         min_y, max_y = y_bnd
 
