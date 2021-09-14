@@ -17,10 +17,11 @@ max_items_in_plot: int = 50
 # TODO: make typings file
 Integral = Union[int, float]
 
+
 def _make_chart_dicts_for_boxplot(
     x: List[int],
     ys: List[List[Integral]],
-    x_title: str, y_title: str # TODO: are these needed?
+    x_title: str, y_title: str  # TODO: are these needed?
 ) -> List[Dict[str, Union[str, int, List[Integral]]]]:
     return [
         {
@@ -49,22 +50,23 @@ def _make_chart_dicts(
     List[Dict[str, Union[str, List[Integral], List[List[Union[int, Integral]]]]]],
     Dict[str, Dict[str, Any]]
 ]:
-    series: List[Dict[str, Union[str, List[Integral], List[List[Union[int, Integral]]]]]] = []
-
-    for i in range(len(ys)):
-        if plot_type == 'line':
-            data: List[Integral] = [round(_, 3) for _ in ys[i]]
-        else:
-            data = [[x[j], round(_process_y_value(ys[i][j]), 3)] for j in range(len(ys[i]))]
-
-        series.append({
-            'name': names[i],
-            'data': data
-        })
+    series: List[Dict[
+        str,
+        Union[str, List[Integral], List[List[Union[int, Integral]]]]
+    ]] = [
+        {
+            'name': names[idx1],
+            'data':
+                [round(_, 3) for _ in y]
+                if plot_type == "line"
+                else [[x[idx2], round(_, 3)] for idx2, _ in enumerate(y)]
+        }
+        for idx1, y in enumerate(ys)
+    ]
 
     if not y_bnd:
-        min_y = min([_process_y_value(min(y)) for y in ys]) * 0.95
-        max_y = max([_process_y_value(max(y)) for y in ys]) * 1.05
+        min_y: float = min(min(y) for y in ys) * 0.95
+        max_y: float = max(max(y) for y in ys) * 1.05
     else:
         min_y, max_y = y_bnd
 
@@ -115,8 +117,10 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
 
     x: List[int] = list(range(len(history.individuals)))
 
-    series: List[Dict[str, Union[str, int, List[Integral]]]] = _make_chart_dicts_for_boxplot(x=x, ys=y_gen,
-                                           x_title='Epochs', y_title='Fitness')
+    series: List[Dict[str, Union[str, int, List[Integral]]]] = _make_chart_dicts_for_boxplot(
+        x=x, ys=y_gen,
+        x_title='Epochs', y_title='Fitness'
+    )
 
     output = BoxPlotData(series=series)
     return output
@@ -138,7 +142,7 @@ def _test_prediction_for_pipeline(
 def get_modelling_results(
     case: ShowcaseItem,
     pipeline: Optional[Pipeline],
-    baseline_pipeline: Optional[Pipeline]=None
+    baseline_pipeline: Optional[Pipeline] = None
 ) -> PlotData:
     _, prediction = _test_prediction_for_pipeline(case, pipeline)
     baseline_prediction: Optional[OutputData] = None
