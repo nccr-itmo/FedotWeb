@@ -75,7 +75,7 @@ def test_make_chart_dicts_for_boxplot(case: InputCase):
         }
         for idx, y in enumerate(case.ys)
     ]
-    assert sorted(result, key=lambda dct: dct.keys()) == sorted(etalon, key=lambda dct: dct.keys())
+    assert result == etalon
 
 
 @pytest.mark.parametrize("case", InputCases)
