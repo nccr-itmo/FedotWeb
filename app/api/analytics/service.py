@@ -19,20 +19,17 @@ Integral = Union[int, float]
 def _make_chart_dicts_for_boxplot(
     x: List[int],
     ys: List[List[Integral]],
-    x_title: str, y_title: str
+    x_title: str, y_title: str # TODO: are these needed?
 ) -> List[Dict[str, Union[str, int, List[Integral]]]]:
-    series: List[Dict[str, Union[str, int, List[Integral]]]] = []
-
-    for i in range(len(ys)):
-        y: List[Integral] = [round(_, 3) for _ in ys[i]]
-        series.append({
-            'y': f'Gen {x[i]}',
-            'x': y,
+    return [
+        {
+            'x': [round(_, 3) for _ in y],
+            'y': f'Gen {x[idx]}',
             'type': 'box',
-            'name': i
-        })
-
-    return series
+            'name': idx
+        }
+        for idx, y in enumerate(ys)
+    ]
 
 
 def _make_chart_dicts(
