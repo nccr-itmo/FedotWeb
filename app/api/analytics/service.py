@@ -21,11 +21,11 @@ def _make_chart_dicts_for_boxplot(
     x: List[int],
     ys: List[List[Integral]],
     x_title: str, y_title: str
-) -> List[Dict[str, Union[str, int, list]]]:
-    series: List[Dict[str, Union[str, int, list]]] = []
+) -> List[Dict[str, Union[str, int, List[Integral]]]]:
+    series: List[Dict[str, Union[str, int, List[Integral]]]] = []
 
     for i in range(len(ys)):
-        y: List[int] = [round(_, 3) for _ in ys[i]]
+        y: List[Integral] = [round(_, 3) for _ in ys[i]]
         series.append({
             'y': f'Gen {x[i]}',
             'x': y,
@@ -49,14 +49,14 @@ def _make_chart_dicts(
     names: List[str],
     x_title: str, y_title: str, plot_type: str, y_bnd=None
 ) -> Tuple[
-    List[Dict[str, Union[str, List[int], List[List[int]]]]],
+    List[Dict[str, Union[str, List[Integral], List[List[Union[int, Integral]]]]]],
     Dict[str, Dict[str, Any]]
 ]:
-    series: List[Dict[str, Union[str, List[int], List[List[int]]]]] = []
+    series: List[Dict[str, Union[str, List[Integral], List[List[Union[int, Integral]]]]]] = []
 
     for i in range(len(ys)):
         if plot_type == 'line':
-            data: List[int] = [round(_, 3) for _ in ys[i]]
+            data: List[Integral] = [round(_, 3) for _ in ys[i]]
         else:
             data = [[x[j], round(_process_y_value(ys[i][j]), 3)] for j in range(len(ys[i]))]
 
@@ -95,7 +95,7 @@ def _make_chart_dicts(
 def get_quality_analytics(case_id: str) -> PlotData:
     history: OptHistory = composer_history_for_case(case_id)
 
-    y: List[int] = [round(abs(min([i.fitness for i in gen])), 3) for gen in history.individuals]
+    y: List[Integral] = [round(abs(min([i.fitness for i in gen])), 3) for gen in history.individuals]
     x: List[int] = list(range(len(history.individuals)))
 
     series, options = _make_chart_dicts(x=x, ys=[y], names=['Test sample'],
@@ -118,7 +118,7 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
 
     x: List[int] = list(range(len(history.individuals)))
 
-    series: List[Dict[str, Union[str, int, list]]] = _make_chart_dicts_for_boxplot(x=x, ys=y_gen,
+    series: List[Dict[str, Union[str, int, List[Integral]]]] = _make_chart_dicts_for_boxplot(x=x, ys=y_gen,
                                            x_title='Epochs', y_title='Fitness')
 
     output = BoxPlotData(series=series)
