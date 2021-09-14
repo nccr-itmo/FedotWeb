@@ -16,10 +16,11 @@ max_items_in_plot: int = 50
 # TODO: make typings file
 Integral = Union[int, float]
 
+
 def _make_chart_dicts_for_boxplot(
     x: List[int],
     ys: List[List[Integral]],
-    x_title: str, y_title: str # TODO: are these needed?
+    x_title: str, y_title: str  # TODO: are these needed?
 ) -> List[Dict[str, Union[str, int, List[Integral]]]]:
     return [
         {
@@ -108,8 +109,9 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
 
     x: List[int] = list(range(len(history.individuals)))
 
-    series: List[Dict[str, Union[str, int, List[Integral]]]] = _make_chart_dicts_for_boxplot(x=x, ys=y_gen,
-                                           x_title='Epochs', y_title='Fitness')
+    series: List[Dict[str, Union[str, int, List[Integral]]]] = _make_chart_dicts_for_boxplot(
+        x=x, ys=y_gen, x_title='Epochs', y_title='Fitness'
+    )
 
     output = BoxPlotData(series=series)
     return output
@@ -131,7 +133,7 @@ def _test_prediction_for_pipeline(
 def get_modelling_results(
     case: ShowcaseItem,
     pipeline: Optional[Pipeline],
-    baseline_pipeline: Optional[Pipeline]=None
+    baseline_pipeline: Optional[Pipeline] = None
 ) -> PlotData:
     _, prediction = _test_prediction_for_pipeline(case, pipeline)
     baseline_prediction: Optional[OutputData] = None

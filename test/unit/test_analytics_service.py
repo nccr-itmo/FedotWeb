@@ -19,6 +19,7 @@ class InputCase:
     names: List[str]
     y_bnd: Optional[Tuple[int, int]]
 
+
 InputCases = [
     InputCase(
         x=[1, 2, 3],
@@ -41,7 +42,7 @@ InputCases = [
         ],
         x_title="x",
         y_title="y",
-        names = ["test", "sample", "cases"],
+        names=["test", "sample", "cases"],
         y_bnd=(1.14, 9.555)
     ),
     InputCase(
@@ -53,10 +54,11 @@ InputCases = [
         ],
         x_title="x",
         y_title="y",
-        names = ["test", "sample", "cases"],
+        names=["test", "sample", "cases"],
         y_bnd=(0, 9.45)
     )
 ]
+
 
 @pytest.mark.parametrize("case", InputCases)
 def test_make_chart_dicts_for_boxplot(case: InputCase):
