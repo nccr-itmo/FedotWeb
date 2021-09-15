@@ -113,14 +113,15 @@ def get_quality_analytics(case_id: str) -> PlotData:
 def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
     history: OptHistory = composer_history_for_case(case_id)
 
+    y_gen: List[List[Integral]]
     if analytic_type == 'pheno':
-        y_gen: List[List[Integral]] = [[abs(i.fitness) for i in gen] for gen in history.individuals]
+        y_gen = [[abs(i.fitness) for i in gen] for gen in history.individuals]
     elif analytic_type == 'geno':
-        y_gen: List[List[Integral]] = [[abs(i.graph.depth) for i in gen] for gen in history.individuals]
+        y_gen = [[abs(i.graph.depth) for i in gen] for gen in history.individuals]
     else:
         raise ValueError(f'Analytic type {analytic_type} not recognized')
 
-    x: List[int] = list(range(len(history.individuals)))
+    x: List[int] = [idx for idx, _ in enumerate(history.individuals)]
 
     series: List[Dict[str, Union[str, int, List[Integral]]]] = _make_chart_dicts_for_boxplot(
         x=x, ys=y_gen,
