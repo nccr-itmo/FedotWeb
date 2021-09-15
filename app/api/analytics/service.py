@@ -135,14 +135,15 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
 def _test_prediction_for_pipeline(
     case: ShowcaseItem, pipeline: Optional[Pipeline]
 ) -> Tuple[Optional[InputData], Optional[OutputData]]:
-    train_data: Optional[InputData] = get_input_data(dataset_name=case.metadata.dataset_name, sample_type='train')
-
-    if not pipeline.is_fitted:
-        pipeline.fit(train_data)
-
     test_data: Optional[InputData] = get_input_data(dataset_name=case.metadata.dataset_name, sample_type='test')
-    prediction: Optional[OutputData]
-    prediction = pipeline.predict(test_data)
+    prediction: Optional[OutputData] = None
+    if pipeline:
+        train_data: Optional[InputData]
+        if not pipeline.is_fitted and (train_data := get_input_data(
+            dataset_name=case.metadata.dataset_name, sample_type='train'
+        )):
+            pipeline.fit(train_data)
+        prediction = pipeline.predict(test_data)
     return test_data, prediction
 
 
