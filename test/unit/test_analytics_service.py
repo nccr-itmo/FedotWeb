@@ -77,7 +77,7 @@ def test_make_chart_dicts_for_boxplot(case: InputCase):
         }
         for idx, y in enumerate(case.ys)
     ]
-    assert result == etalon
+    assert result == etalon, f"Chart dicts aren't equal: {result} != {etalon}"
 
 
 @pytest.mark.parametrize("case", InputCases)
@@ -126,8 +126,8 @@ def test_make_chart_dicts(case: InputCase):
                 'max': max_y
             }
         }
-    assert result_series == etalon_series, "Series aren't equal"
-    assert result_options == etalon_options, "Options aren't equal"
+    assert result_series == etalon_series, f"Series aren't equal: {result_series} != {etalon_series}"
+    assert result_options == etalon_options, f"Options aren't equal: {result_options} != {etalon_options}"
 
 
 def test_get_quality_analytics(monkeypatch):
