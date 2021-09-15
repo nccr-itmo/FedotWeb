@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import app.api.analytics.models
-import app.api.analytics.service
-import app.api.composer.service
 import pytest
 from app.api.analytics.service import (_make_chart_dicts,
                                        _make_chart_dicts_for_boxplot,
@@ -134,8 +131,16 @@ def test_make_chart_dicts(case: InputCase):
 
 
 def test_get_quality_analytics(monkeypatch):
+    @dataclass
+    class MockIndividualFitness:
+        fitness: int
+
     individuals = [
-        1.1111, 2.2229999, 3.3366, 5.54321, 6.123456
+        [
+            MockIndividualFitness(fitness)
+            for fitness in fitness_lst
+        ]
+        for fitness_lst in [[1.1111, 2.2229999], [3.3366], [5.54321, 6.123456, 10.54346]]
     ]
 
     @dataclass
@@ -150,18 +155,25 @@ def test_get_quality_analytics(monkeypatch):
     )
 
     def mock_make_chart_dicts(x, ys, names, x_title, y_title, plot_type):
-        return x, ys
+        return x, ys[0]
     monkeypatch.setattr(
         "app.api.analytics.service._make_chart_dicts", mock_make_chart_dicts
     )
 
     @dataclass
     class MockPlotData:
-        x: list
-        y: list
+        series: list
+        options: list
+
+        def __iter__(self):
+            return iter((self.series, self.options))
+
     monkeypatch.setattr("app.api.analytics.service.PlotData", MockPlotData)
 
-    result: MockPlotData = get_quality_analytics("_")
-    assert result.x and result.y, "MockPlotData is empty"
-    assert result.x == [0, 1, 2, 3, 4], "Incorrect x mapping"
-    assert result.y == [1.111, 2.222, 3.337, 5.543, 6.123], "Incorrect y mapping"
+    x, y = get_quality_analytics("_")
+    assert x and y, "MockPlotData is empty"
+    assert len(x) == len(y), "x and y should have the same shape"
+    etalon_x = [0, 1, 2]
+    assert x == etalon_x, f"Incorrect x mapping: {x} != {etalon_x}"
+    etalon_y = [1.111, 3.337, 5.543]
+    assert y == etalon_y, f"Incorrect y mapping: {y} != {etalon_y}"
