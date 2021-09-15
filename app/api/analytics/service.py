@@ -86,12 +86,17 @@ def _make_chart_dicts(
 def get_quality_analytics(case_id: str) -> PlotData:
     history: OptHistory = composer_history_for_case(case_id)
 
-    y: List[Integral] = [round(abs(min([i.fitness for i in gen])), 3) for gen in history.individuals]
-    x: List[int] = list(range(len(history.individuals)))
+    y: List[Integral] = [
+        round(abs(min(i.fitness for i in gen)), 3)
+        for gen in history.individuals
+    ]
+    x: List[int] = [idx for idx, _ in enumerate(history.individuals)]
 
-    series, options = _make_chart_dicts(x=x, ys=[y], names=['Test sample'],
-                                        x_title='Epochs', y_title='Fitness',
-                                        plot_type='line')
+    series, options = _make_chart_dicts(
+        x=x, ys=[y],
+        names=['Test sample'],
+        x_title='Epochs', y_title='Fitness', plot_type='line'
+    )
 
     output = PlotData(series=series, options=options)
     return output
