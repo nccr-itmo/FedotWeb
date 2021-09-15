@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import app.api.analytics.models
+import app.api.analytics.service
+import app.api.composer.service
 import pytest
 from app.api.analytics.service import (_make_chart_dicts,
                                        _make_chart_dicts_for_boxplot,
@@ -128,3 +131,37 @@ def test_make_chart_dicts(case: InputCase):
         }
     assert result_series == etalon_series, "Series aren't equal"
     assert result_options == etalon_options, "Options aren't equal"
+
+
+def test_get_quality_analytics(monkeypatch):
+    individuals = [
+        1.1111, 2.2229999, 3.3366, 5.54321, 6.123456
+    ]
+
+    @dataclass
+    class MockOptHistory:
+        individuals: list
+
+    def mock_composer_history_for_case(case_id: str):
+        history = MockOptHistory(individuals)
+        return history
+    monkeypatch.setattr(
+        "app.api.analytics.service.composer_history_for_case", mock_composer_history_for_case
+    )
+
+    def mock_make_chart_dicts(x, ys, names, x_title, y_title, plot_type):
+        return x, ys
+    monkeypatch.setattr(
+        "app.api.analytics.service._make_chart_dicts", mock_make_chart_dicts
+    )
+
+    @dataclass
+    class MockPlotData:
+        x: list
+        y: list
+    monkeypatch.setattr("app.api.analytics.service.PlotData", MockPlotData)
+
+    result: MockPlotData = get_quality_analytics("_")
+    assert result.x and result.y, "MockPlotData is empty"
+    assert result.x == [0, 1, 2, 3, 4], "Incorrect x mapping"
+    assert result.y == [1.111, 2.222, 3.337, 5.543, 6.123], "Incorrect y mapping"
