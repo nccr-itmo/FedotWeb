@@ -177,3 +177,85 @@ def test_get_quality_analytics(monkeypatch):
     assert x == etalon_x, f"Incorrect x mapping: {x} != {etalon_x}"
     etalon_y = [1.111, 3.337, 5.543]
     assert y == etalon_y, f"Incorrect y mapping: {y} != {etalon_y}"
+
+
+def test_test_prediction_for_pipeline(monkeypatch):
+    @dataclass
+    class MockInputData:
+        val: str = ""
+    monkeypatch.setattr(
+        "app.api.analytics.service.InputData", MockInputData
+    )
+
+    def mock_get_input_data(*args, **kwargs):
+        if kwargs["dataset_name"] is None:
+            return None
+        return MockInputData()
+    monkeypatch.setattr(
+        "app.api.analytics.service.get_input_data", mock_get_input_data
+    )
+
+    @dataclass
+    class MockMetaData:
+        dataset_name: str = ""
+
+    @dataclass
+    class MockShowcaseItem:
+        metadata: MockMetaData = MockMetaData()
+    monkeypatch.setattr(
+        "app.api.analytics.service.ShowcaseItem", MockShowcaseItem
+    )
+
+    @dataclass
+    class MockOutputData:
+        pass
+
+    @dataclass
+    class MockPipeline:
+        fitted_data: MockInputData = None
+        is_fitted: bool = False
+
+        def fit(self, input_data: MockInputData):
+            fitted_data = input_data
+            fitted_data.val = "changed"
+            self.is_fitted = True
+
+        def predict(self, *args, **kwargs):
+            if not self.is_fitted:
+                raise ValueError()
+            return MockOutputData()
+    monkeypatch.setattr(
+        "app.api.analytics.service.Pipeline", MockPipeline
+    )
+    test_inputs = [  # tests all paths covered
+        (
+            MockShowcaseItem(MockMetaData(None)), None,
+            lambda test_data, prediction: test_data is None and prediction is None
+        ),
+        (
+            MockShowcaseItem(MockMetaData(None)), MockPipeline(),
+            "exception"
+        ),
+        (
+            MockShowcaseItem(MockMetaData(None)), MockPipeline(is_fitted=True),
+            lambda test_data, prediction: test_data is None and type(prediction) is MockOutputData
+        ),
+        (
+            MockShowcaseItem(), None,
+            lambda test_data, prediction: type(test_data) is MockInputData and prediction is None
+        ),
+        (
+            MockShowcaseItem(), MockPipeline(),
+            lambda test_data, prediction: type(test_data) is MockInputData and type(prediction) is MockOutputData
+        ),
+        (
+            MockShowcaseItem(), MockPipeline(is_fitted=True),
+            lambda test_data, prediction: type(test_data) is MockInputData and type(prediction) is MockOutputData
+        )
+    ]
+    for case, pipeline, target in test_inputs:
+        if type(target) is str:
+            with pytest.raises(ValueError):
+                _test_prediction_for_pipeline(case, pipeline)
+        else:
+            target(*_test_prediction_for_pipeline(case, pipeline))
