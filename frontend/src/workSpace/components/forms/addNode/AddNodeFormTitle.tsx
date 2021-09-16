@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, { FC } from "react";
 import scss from "./addNodeForm.module.scss";
 
 interface I {

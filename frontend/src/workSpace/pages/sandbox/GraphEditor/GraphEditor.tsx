@@ -1,13 +1,14 @@
-import React, {useEffect} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {useLocation} from "react-router-dom";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+// import { useLocation } from "react-router-dom";
 
-import {makeStyles} from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
-import {StateType} from "../../../../redux/store";
-import {getMainGraph} from "../../../../redux/reducers/sandBox/sandbox-reducer";
+import { StateType } from "../../../../redux/store";
+import { getMainGraph } from "../../../../redux/reducers/sandBox/sandbox-reducer";
 import GraphEditorDirectedGraph from "./GraphEditorDirectedGraph/GraphEditorDirectedGraph";
 import AddNode from "./AddNode";
+import EditGrarhOnServer from "./EditGrarhOnServer/EditGrarhOnServer";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -23,15 +24,13 @@ const useStyles = makeStyles(() => ({
 
 const GraphEditor = () => {
   const classes = useStyles();
-  const { search } = useLocation();
+  // const { search } = useLocation();
   const dispatch = useDispatch();
 
   const { mainGraph } = useSelector((state: StateType) => state.sandbox_Egor);
   const { show_case_by_id } = useSelector(
     (state: StateType) => state.showCases
   );
-  // console.log(`mainGraph`, mainGraph);
-  // console.log(`show_case_by_id`, show_case_by_id);
 
   useEffect(() => {
     if (show_case_by_id) {
@@ -39,7 +38,7 @@ const GraphEditor = () => {
       //TODO:uid нужен реальный
       dispatch(getMainGraph(show_case_by_id.pipeline_id));
     }
-  }, [dispatch, search, show_case_by_id]);
+  }, [dispatch, show_case_by_id]);
 
   // useEffect(() => {
   //   // console.log(`### mainGraph`, mainGraph);
@@ -47,6 +46,7 @@ const GraphEditor = () => {
 
   return (
     <div className={classes.root}>
+      <EditGrarhOnServer />
       <AddNode />
       {mainGraph && (
         <GraphEditorDirectedGraph

@@ -1,8 +1,8 @@
-import {ThunkAction} from "redux-thunk";
-import {authAPI} from "../../../API/user/userAPI";
+import { ThunkAction } from "redux-thunk";
+import { authAPI } from "../../../API/user/userAPI";
 
-import {StateType} from "../../store";
-import {IAuth} from "../../../API/user/authInterface";
+import { StateType } from "../../store";
+import { IAuth } from "../../../API/user/authInterface";
 
 const LOGIN_USER = "LOGIN_USER";
 const LOGIN_USER_ERROR = "LOGIN_USER_ERROR";

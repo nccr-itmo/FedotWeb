@@ -1,24 +1,25 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 // import { useLocation } from "react-router-dom";
-import {Grid} from "@material-ui/core";
-import {createStyles, makeStyles} from "@material-ui/core/styles";
+
+import { Grid } from "@material-ui/core";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
 
 // import { StateType } from "../../store/store";
 // import { deserializeQuery } from "../../../data/utils/query-helpers";
 import HistoryModal from "./HistoryGraph/HistoryModal/HistoryModal";
 import HistoryGraph from "./HistoryGraph/HistoryGraph";
-import {getHistoryGraph} from "../../../redux/reducers/sandBox/sandbox-reducer";
-import {StateType} from "../../../redux/store";
+import { getHistoryGraph } from "../../../redux/reducers/sandBox/sandbox-reducer";
+import { StateType } from "../../../redux/store";
 import HistoryPageChart from "./charts/HistoryPageChart";
 
 const useStyles = makeStyles(() =>
-    createStyles({
-        item: {
-            background: "#FFFFFF",
-            borderRadius: 8,
-        },
-    })
+  createStyles({
+    item: {
+      background: "#FFFFFF",
+      borderRadius: 8,
+    },
+  })
 );
 
 const HistoryPage = () => {

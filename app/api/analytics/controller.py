@@ -40,6 +40,8 @@ class ResultsPlotResource(Resource):
     def get(self, case_id: str, pipeline_id: str) -> PlotData:
         """Get all lines for results plot"""
         pipeline, case = pipeline_by_uid(pipeline_id), showcase_item_by_uid(case_id)
+        if pipeline is None:
+            raise ValueError(f'Pipeline with id {pipeline_id} not exists.')
         baseline = pipeline_by_uid(f'{case_id}_baseline')
         results_plot = get_modelling_results(case, pipeline, baseline)
         return results_plot

@@ -1,8 +1,8 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 import scss from "./showCaseInfo.module.scss";
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 
-import {StateType} from "../../../../redux/store";
+import { StateType } from "../../../../redux/store";
 import PageTitle from "../../../components/pageTitle/PageTitle";
 import ShowCaseInfoCard from "./card/ShowCaseInfoCard";
 

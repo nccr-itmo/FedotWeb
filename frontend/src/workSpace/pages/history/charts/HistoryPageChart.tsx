@@ -1,12 +1,15 @@
-import React, {memo, useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
+import React, { memo, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import scss from "./historyPageChart.module.scss";
 
 import HistoryPageChartBoxplot from "./boxplot/HistoryPageChartBoxplot";
 import HistoryPageChartHeader from "./header/HistoryPageChartHeader";
-import {StateType} from "../../../../redux/store";
-import {getGenerations, setGenerations,} from "../../../../redux/reducers/history/historyReducer";
+import { StateType } from "../../../../redux/store";
+import {
+  getGenerations,
+  setGenerations,
+} from "../../../../redux/reducers/history/historyReducer";
 
 export const editArr = (arr: any) => {
   return arr.map((item: any) => {

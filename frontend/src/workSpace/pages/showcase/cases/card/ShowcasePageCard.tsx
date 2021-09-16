@@ -1,8 +1,8 @@
-import React, {FC, memo} from "react";
+import React, { FC, memo } from "react";
 import scss from "./showcasePageCard.module.scss";
 
 import CardButton from "../../../../../ui/buttons/CardButton";
-import {ICaseArr} from "../../../../../API/showCase/showCasesInterface";
+import { ICaseArr } from "../../../../../API/showCase/showCasesInterface";
 
 interface IShowcasePageCard {
   caseItem: ICaseArr;

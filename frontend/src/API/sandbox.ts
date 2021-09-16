@@ -1,4 +1,4 @@
-import {instance} from "./baseURL";
+import { instance } from "./baseURL";
 
 import {
   HistoryEdgeType,

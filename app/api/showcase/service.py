@@ -39,6 +39,9 @@ def showcase_full_item_by_uid(case_id: str) -> Optional[ShowcaseItem]:
         case_id = dumped_item['case_id']
         pipeline, case = pipeline_by_uid(pipeline_id), showcase_item_by_uid(case_id)
 
+        if pipeline is None:
+            raise ValueError(f'Pipeline with id {pipeline_id} not exists.')
+
         metrics = get_metrics_for_pipeline(case, pipeline)
         for metric_id in metrics.keys():
             details[metric_id] = metrics[metric_id]

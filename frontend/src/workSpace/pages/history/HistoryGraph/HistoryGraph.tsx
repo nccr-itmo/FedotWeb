@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import {runHistory} from "./historyGraphGenerator";
+import React, { useEffect, useState } from "react";
+import { runHistory } from "./historyGraphGenerator";
 import styles from "./HistoryGraph.module.scss";
 import Loader from "react-loader-spinner";
 
@@ -47,7 +47,7 @@ const HistoryGraph = ({
   const containerRef = React.useRef(null);
   const [showLoader, setShowLoader] = useState(true);
 
-  React.useEffect((): any => {
+  useEffect((): any => {
     if (edgesData.length === 0 || nodesData.length === 0) return;
     let destroyFn;
 

@@ -1,13 +1,14 @@
-import React, {useEffect, useRef, useState} from "react";
-import {runDirectedGraph} from "./directedGraphGenerator";
+import React, { useEffect, useRef, useState } from "react";
+import { runDirectedGraph } from "./directedGraphGenerator";
 import styles from "./directedGraph.module.scss";
 import Loader from "react-loader-spinner";
-import {ClickAwayListener} from "@material-ui/core";
-import {useDispatch, useSelector} from "react-redux";
+import ContextMenu from "../GraphEditorContextMenu/ContextMenu";
+import { ClickAwayListener } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
 import GraphEditorModal from "../GraphEditorModal/GraphEditorModal";
 import useMousePosition from "../../../../../hooks/useMousePosition";
-import {StateType} from "../../../../../redux/store";
-import {actionsSandbox} from "../../../../../redux/reducers/sandBox/sandbox-reducer";
+import { StateType } from "../../../../../redux/store";
+import { actionsSandbox } from "../../../../../redux/reducers/sandBox/sandbox-reducer";
 
 export type EdgeDataType = {
   source: number;

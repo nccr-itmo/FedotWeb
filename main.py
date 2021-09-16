@@ -2,6 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from werkzeug.contrib.fixers import ProxyFix
+import requests
 
 from app import create_app, db, socketio
 
@@ -24,3 +25,4 @@ if __name__ == "__main__":
         socketio.run(app, use_reloader=False)
     else:
         socketio.run(app, use_reloader=False, host=host, port=port)
+

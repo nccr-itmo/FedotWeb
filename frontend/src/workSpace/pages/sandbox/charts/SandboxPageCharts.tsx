@@ -1,7 +1,7 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 import scss from "./sandboxPageCharts.module.scss";
 
-import {Grid} from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 
 import SandboxPageChartsBtns from "./buttons/SandboxPageChartsBtns";
 import SandboxPageChartsMetric from "./metric/SandboxPageChartsMetric";

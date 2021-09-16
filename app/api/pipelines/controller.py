@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import uuid4
 
 from flask import request
 from flask_accepts import accepts, responds
@@ -11,6 +12,7 @@ from .pipeline_convert_utils import pipeline_to_graph, graph_to_pipeline
 from .schema import (PipelineGraphSchema, PipelineResponseSchema,
                      PipelineValidationResponseSchema, PipelineImageSchema)
 from .service import pipeline_by_uid, create_pipeline, validate_pipeline, get_image_url
+from ..data.service import get_input_data
 
 api = Namespace("Pipelines", description="Operations with pipelines")
 
@@ -33,7 +35,7 @@ class PipelinesIdResource(Resource):
 
 
 @cross_origin()
-@api.route("/validate")
+@api.route("/validate", methods=['POST', 'OPTIONS'])
 class PipelinesValidateResource(Resource):
     """Pipeline validation"""
 
@@ -52,9 +54,12 @@ class PipelinesValidateResource(Resource):
 
         return PipelineValidationResponse(is_valid, msg)
 
+    def options(self):
+        return True
+
 
 @cross_origin()
-@api.route("/add")
+@api.route("/add", methods=['POST', 'OPTIONS'])
 class PipelinesAddResource(Resource):
     @accepts(schema=PipelineGraphSchema, api=api)
     @responds(schema=PipelineResponseSchema)
@@ -64,11 +69,16 @@ class PipelinesAddResource(Resource):
         graph = request.parsed_obj
         pipeline = graph_to_pipeline(graph)
         is_correct = validate_pipeline(pipeline)
+
+        new_uid = str(uuid4())
         if is_correct:
-            uid, is_exists = create_pipeline(storage.db, graph['uid'], pipeline)
+            uid, is_exists = create_pipeline(storage.db, new_uid, pipeline)
             return PipelineResponse(uid, is_exists)
         else:
             return PipelineResponse(None, False)
+
+    def options(self):
+        return True
 
 
 @cross_origin()

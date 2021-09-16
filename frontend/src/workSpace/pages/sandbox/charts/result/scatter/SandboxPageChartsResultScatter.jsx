@@ -1,4 +1,4 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 import ReactApexChart from "react-apexcharts";
 
 const SandboxPageChartsResultScatter = ({ data }) => {

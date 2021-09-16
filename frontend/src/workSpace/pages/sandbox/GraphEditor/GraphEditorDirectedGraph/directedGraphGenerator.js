@@ -16,7 +16,7 @@ export function runDirectedGraph(
   let links = linksData.map((d) => Object.assign({}, d));
   let nodes = nodesData.map((d) => Object.assign({}, d));
 
-console.log(`nodes`, nodes)
+
 
   const containerRect = container.getBoundingClientRect();
   const height = containerRect.height;

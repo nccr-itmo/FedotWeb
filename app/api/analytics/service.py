@@ -1,7 +1,7 @@
 import typing as npt
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import numpy
+import numpy as np
 from app.api.composer.service import composer_history_for_case
 from app.api.data.service import get_input_data
 from app.api.showcase.models import ShowcaseItem
@@ -15,6 +15,13 @@ max_items_in_plot: int = 50
 
 # TODO: make typings file
 Integral = Union[int, float]
+
+
+def _process_y_value(y):
+    y_new = y
+    if isinstance(y, list) or isinstance(y, np.ndarray):
+        y_new = y[0]
+    return round(y_new, 3)
 
 
 def _make_chart_dicts_for_boxplot(
@@ -57,8 +64,8 @@ def _make_chart_dicts(
     ]
 
     if not y_bnd:
-        min_y: float = min(min(y) for y in ys) * 0.95
-        max_y: float = max(max(y) for y in ys) * 1.05
+        min_y: float = min(_process_y_value(min(y)) for y in ys) * 0.95
+        max_y: float = max(_process_y_value(max(y)) for y in ys) * 1.05
     else:
         min_y, max_y = y_bnd
 
@@ -144,7 +151,14 @@ def get_modelling_results(
     pipeline: Optional[Pipeline],
     baseline_pipeline: Optional[Pipeline] = None
 ) -> PlotData:
-    _, prediction = _test_prediction_for_pipeline(case, pipeline)
+    test_data, prediction = _test_prediction_for_pipeline(case, pipeline)
+
+    obs: list
+    if case.metadata.task_name == 'ts_forecasting':
+        obs = test_data.target
+    else:
+        obs = list([float(o[0]) for o in test_data.target])
+
     baseline_prediction: Optional[OutputData] = None
     if baseline_pipeline:
         _, baseline_prediction = _test_prediction_for_pipeline(case, baseline_pipeline)
@@ -168,10 +182,13 @@ def get_modelling_results(
         plot_type = 'line'
         y = list(prediction.predict[0, :])
         y_baseline = list(baseline_prediction.predict[0, :]) if baseline_prediction else None
+        y_obs = list([float(o) for o in obs]) if obs is not None else None
     else:
         plot_type = 'scatter'
         y = prediction.predict.tolist()
-        y_baseline = baseline_prediction.predict.tolist() if baseline_prediction else None
+        if baseline_prediction:
+            y_baseline = list(baseline_prediction.predict) if baseline_prediction else None
+        y_obs = obs
 
     x: List[int] = [idx for idx, _ in enumerate(prediction.predict[:max_items_in_plot])]
     y = y[:max_items_in_plot]
@@ -181,6 +198,11 @@ def get_modelling_results(
         y_baseline = y_baseline[:max_items_in_plot]
         ys.append(y_baseline)
         names.append('Baseline')
+    if obs is not None:
+        y_obs = y_obs[:max_items_in_plot]
+        ys.append(y_obs)
+        names.append('Observations')
+
     series, options = _make_chart_dicts(x=x, ys=ys, names=names,
                                         x_title=x_title, y_title=y_title,
                                         plot_type=plot_type, y_bnd=y_bnd)

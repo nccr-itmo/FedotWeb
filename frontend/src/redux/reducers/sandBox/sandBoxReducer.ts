@@ -1,10 +1,15 @@
-import {ThunkAction} from "redux-thunk";
-import {sandBoxAPI} from "../../../API/sandBox/sandBoxAPI";
-import {StateType} from "../../store";
-import {IEpoch} from "./../../../API/sandBox/sandBoxInterface";
-import {analyticsAPI} from "./../../../API/analytics/analyticsAPI";
-import {IMetric, IResult} from "../../../API/analytics/analyticsInterface";
-import {NodeDataType} from "../../../workSpace/pages/sandbox/GraphEditor/GraphEditorDirectedGraph/GraphEditorDirectedGraph";
+import { ThunkAction } from "redux-thunk";
+import { sandBoxAPI } from "../../../API/sandBox/sandBoxAPI";
+import { StateType } from "../../store";
+import { IEpoch } from "./../../../API/sandBox/sandBoxInterface";
+import { analyticsAPI } from "./../../../API/analytics/analyticsAPI";
+import { IMetric, IResult } from "../../../API/analytics/analyticsInterface";
+import {
+  EdgeDataType,
+  NodeDataType,
+} from "../../../workSpace/pages/sandbox/GraphEditor/GraphEditorDirectedGraph/GraphEditorDirectedGraph";
+import { pipelineAPI } from "../../../API/pipeline/pipelineAPI";
+import { getMainGraph } from "./sandbox-reducer";
 
 interface Iedit_or_add_form_opened {
   isOpen: boolean;
@@ -36,14 +41,14 @@ let initialState = {
 
 export type InitialStateType = typeof initialState;
 type AllTyps =
-    | ParamsType
-    | InitialValuesEditFormType
-    | EditOrAddFormOpenedType
-    | EpochsArrType
-    | EpochsSelectedType
-    | ResultsType
-    | MetricsType
-    | HistipyType;
+  | ParamsType
+  | InitialValuesEditFormType
+  | EditOrAddFormOpenedType
+  | EpochsArrType
+  | EpochsSelectedType
+  | ResultsType
+  | MetricsType
+  | HistipyType;
 
 const sandBoxReducer = (
   state = initialState,
@@ -51,21 +56,21 @@ const sandBoxReducer = (
 ): InitialStateType => {
   switch (action.type) {
     case SANDBOX_EPOCHS:
-      return {...state, sandBox_epochs: action.data};
+      return { ...state, sandBox_epochs: action.data };
     case SANDBOX_EPOCH_SELCTED:
-      return {...state, sandBox_epochs_selected: action.data};
+      return { ...state, sandBox_epochs_selected: action.data };
     case SANDBOX_RESULTS:
-      return {...state, sandbox_results: action.data};
+      return { ...state, sandbox_results: action.data };
     case SANDBOX_METRICS:
-      return {...state, sandbox_metrics: action.data};
+      return { ...state, sandbox_metrics: action.data };
     case SANDBOX_HISTORY:
-      return {...state, sandbox_history: action.data};
+      return { ...state, sandbox_history: action.data };
     case SANDBOX_EDIT_OR_ADD_FORM_OPENED:
-      return {...state, sandbox_edit_or_add_form_opened: action.data};
+      return { ...state, sandbox_edit_or_add_form_opened: action.data };
     case SANDBOX_INITIAL_VALUES_EDIT_POINT:
-      return {...state, sandbox_Initial_values_edit_piont: action.data};
+      return { ...state, sandbox_Initial_values_edit_piont: action.data };
     case SANDBOX_PARAMS:
-      return {...state, sandbox_params: action.data};
+      return { ...state, sandbox_params: action.data };
 
     default:
       return state;
@@ -127,13 +132,13 @@ export const actionsSandBox = {
     data,
   }),
   setEditOrAddFormOpened: (
-      data: Iedit_or_add_form_opened
+    data: Iedit_or_add_form_opened
   ): EditOrAddFormOpenedType => ({
     type: SANDBOX_EDIT_OR_ADD_FORM_OPENED,
     data,
   }),
   setInitialValuesEditForm: (
-      data: null | NodeDataType
+    data: null | NodeDataType
   ): InitialValuesEditFormType => ({
     type: SANDBOX_INITIAL_VALUES_EDIT_POINT,
     data,
@@ -198,7 +203,7 @@ export const setHistoryToggle = (data: boolean): ThunkType => {
 };
 
 export const setEditOrAddFormOpened = (
-    data: Iedit_or_add_form_opened
+  data: Iedit_or_add_form_opened
 ): ThunkType => {
   return (dispatch) => {
     dispatch(actionsSandBox.setEditOrAddFormOpened(data));
@@ -206,12 +211,12 @@ export const setEditOrAddFormOpened = (
 };
 
 export const setInitialValuesEditForm = (
-    node: NodeDataType | undefined | null
+  node: NodeDataType | undefined | null
 ): ThunkType => {
   return (dispatch) => {
     if (node) {
       dispatch(
-          actionsSandBox.setEditOrAddFormOpened({isOpen: false, type: "new"})
+        actionsSandBox.setEditOrAddFormOpened({ isOpen: false, type: "new" })
       );
       dispatch(actionsSandBox.setInitialValuesEditForm(node));
     } else {
@@ -224,8 +229,33 @@ export const getParams = (caseId: string): ThunkTypeAsync => {
   return async (dispatch) => {
     try {
       let params = await sandBoxAPI.getSandBoxParams(caseId);
-      console.log(`paramssdfsdfs`, params);
       dispatch(actionsSandBox.setParams(params));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+};
+
+export const sendNewGraphOnServer = (
+  caseId: string,
+  uid: string,
+  nodes: NodeDataType[],
+  edges: EdgeDataType[]
+): ThunkTypeAsync => {
+  return async (dispatch) => {
+    try {
+      let validate = await pipelineAPI.postValidate(uid, nodes, edges);
+      if (validate.is_valid) {
+        let editedGraph = await pipelineAPI.postAdd(uid, nodes, edges);
+        if (editedGraph.is_new) {
+          dispatch(getMainGraph(editedGraph.uid));
+          let results = await analyticsAPI.getResults(caseId, editedGraph.uid);
+          dispatch(actionsSandBox.results(results));
+           alert('Graph is valid. Added.');
+        }
+      } else {
+        alert(validate.error_desc);
+      }
     } catch (err) {
       console.error(err);
     }

@@ -1,5 +1,5 @@
-import {ThunkAction} from "redux-thunk";
-import {StateType} from "../../store";
+import { ThunkAction } from "redux-thunk";
+import { StateType } from "../../store";
 
 const PAGE_SELECTED = "PAGE_SELECTED";
 

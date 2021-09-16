@@ -1,18 +1,21 @@
-import React, {FC, memo} from "react";
-import {useFormik} from "formik";
-import {useDispatch, useSelector} from "react-redux";
+import React, { FC, memo } from "react";
+import { useFormik } from "formik";
+import { useDispatch, useSelector } from "react-redux";
 import scss from "./addNodeForm.module.scss";
 
-import {createStyles, makeStyles} from "@material-ui/core/styles";
-import {Paper} from "@material-ui/core";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
+import { Paper } from "@material-ui/core";
 
 import AddNodeFormTitle from "./AddNodeFormTitle";
 import AddNodeFormName from "./name/AddNodeFormName";
-import {StateType} from "../../../../redux/store";
+import { StateType } from "../../../../redux/store";
 import AddNodeFormParents from "./parents/AddNodeFormParents";
 import AddNodeFormChildren from "./children/AddNodeFormChildren";
 import AddNodeFormType from "./type/AddNodeFormType";
-import {actionsSandbox, editMainGraph,} from "../../../../redux/reducers/sandBox/sandbox-reducer";
+import {
+  actionsSandbox,
+  editMainGraph,
+} from "../../../../redux/reducers/sandBox/sandbox-reducer";
 import ButtonsCancelAndSubmit from "../../../../ui/formik/buttons/ButtonsCancelAndSubmit";
 
 const useStyles = makeStyles(() =>
@@ -55,21 +58,20 @@ const creatingConnections = (
 
 interface I {
   setFromClosed(): void;
-
   type: "edit" | "new";
 }
 
-const AddNodeForm: FC<I> = ({setFromClosed, type}) => {
+const AddNodeForm: FC<I> = ({ setFromClosed, type }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const {mainGraph} = useSelector((state: StateType) => state.sandbox_Egor);
-  const {sandbox_Initial_values_edit_piont} = useSelector(
-      (state: StateType) => state.sandBox
+  const { mainGraph } = useSelector((state: StateType) => state.sandbox_Egor);
+  const { sandbox_Initial_values_edit_piont } = useSelector(
+    (state: StateType) => state.sandBox
   );
 
   const newInitialValues = {
     name: "",
-    id: mainGraph.nodes.length,
+    id: mainGraph.nodes.length + 1000,
     parents: "",
     children: "",
     type: "model", //должен быть select
@@ -92,52 +94,52 @@ const AddNodeForm: FC<I> = ({setFromClosed, type}) => {
 
       if (type === "edit") {
         dispatch(
-            editMainGraph(
-                mainGraph,
-                [
-                  {
-                    id: values.id,
-                    display_name: values.name,
-                    model_name: values.name,
-                    type: values.type,
-                    params: {},
-                    parents: JSON.parse(`[${values.parents}]`),
-                    children: JSON.parse(`[${values.children}]`),
-                  },
-                ],
-                creatingConnections(
-                    values.id,
-                    JSON.parse(`[${values.children}]`),
-                    JSON.parse(`[${values.parents}]`)
-                )
+          editMainGraph(
+            mainGraph,
+            [
+              {
+                id: values.id,
+                display_name: values.name,
+                model_name: values.name,
+                type: values.type,
+                params: {},
+                parents: JSON.parse(`[${values.parents}]`),
+                children: JSON.parse(`[${values.children}]`),
+              },
+            ],
+            creatingConnections(
+              values.id,
+              JSON.parse(`[${values.children}]`),
+              JSON.parse(`[${values.parents}]`)
             )
+          )
         );
       } else {
         creatingConnections(
-            values.id,
-            JSON.parse(`[${values.children}]`),
-            JSON.parse(`[${values.parents}]`)
+          values.id,
+          JSON.parse(`[${values.children}]`),
+          JSON.parse(`[${values.parents}]`)
         );
 
         dispatch(
-            actionsSandbox.addNodeMainGraph({
-              nodes: [
-                {
-                  id: values.id,
-                  display_name: values.name,
-                  model_name: values.name,
-                  type: values.type,
-                  params: {},
-                  parents: JSON.parse(`[${values.parents}]`),
-                  children: JSON.parse(`[${values.children}]`),
-                },
-              ],
-              edges: creatingConnections(
-                  values.id,
-                  JSON.parse(`[${values.children}]`),
-                  JSON.parse(`[${values.parents}]`)
-              ),
-            })
+          actionsSandbox.addNodeMainGraph({
+            nodes: [
+              {
+                id: values.id,
+                display_name: values.name,
+                model_name: values.name,
+                type: values.type,
+                params: {},
+                parents: JSON.parse(`[${values.parents}]`),
+                children: JSON.parse(`[${values.children}]`),
+              },
+            ],
+            edges: creatingConnections(
+              values.id,
+              JSON.parse(`[${values.children}]`),
+              JSON.parse(`[${values.parents}]`)
+            ),
+          })
         );
       }
 
@@ -147,24 +149,24 @@ const AddNodeForm: FC<I> = ({setFromClosed, type}) => {
 
   return (
     <Paper elevation={3} className={classes.root}>
-      <AddNodeFormTitle title={type === "edit" ? "edit Point" : "add Point"}/>
+      <AddNodeFormTitle title={type === "edit" ? "edit Point" : "add Point"} />
       <div className={scss.formRoot}>
         <form onSubmit={formik.handleSubmit}>
           <AddNodeFormName
-              values={formik.values}
-              onChange={formik.handleChange}
-          />
-          <AddNodeFormParents
-              values={formik.values}
-              onChange={formik.handleChange}
-          />
-          <AddNodeFormChildren
-              values={formik.values}
-              onChange={formik.handleChange}
-          />
-          <AddNodeFormType
             values={formik.values}
             onChange={formik.handleChange}
+          />
+          <AddNodeFormParents
+            values={formik.values}
+            onChange={formik.handleChange}
+          />
+          <AddNodeFormChildren
+            values={formik.values}
+            onChange={formik.handleChange}
+          />
+          <AddNodeFormType
+              values={formik.values}
+              onChange={formik.handleChange}
           />
           <div className={classes.buttonsPosition}>
             <ButtonsCancelAndSubmit

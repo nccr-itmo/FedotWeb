@@ -1,35 +1,35 @@
-import React, {memo} from "react";
-import {useDispatch, useSelector} from "react-redux";
+import React, { memo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import {Grid} from "@material-ui/core";
-import {createStyles, makeStyles} from "@material-ui/core/styles";
+import { Grid } from "@material-ui/core";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
 
-import {StateType} from "../../../../../redux/store";
-import {setgenothypicPhenothypic} from "../../../../../redux/reducers/history/historyReducer";
+import { StateType } from "../../../../../redux/store";
+import { setgenothypicPhenothypic } from "../../../../../redux/reducers/history/historyReducer";
 
 const useStyles = makeStyles(() =>
-    createStyles({
-        item: {
-            textAlign: "center",
-        },
-        text: {
-            fontFamily: "Open Sans",
-            fontWeight: "normal",
-            fontSize: "18px",
-            lineHeight: "120%",
-            letterSpacing: "0.15px",
-
-            color: "#263238",
-
-            "&:hover": {
-                background: "#E2E7EA",
-                cursor: "pointer",
-
-                borderRadius: 8,
-
-        transition: "all 0.5s",
-      },
+  createStyles({
+    item: {
+      textAlign: "center",
     },
+    text: {
+      fontFamily: "Open Sans",
+      fontWeight: "normal",
+      fontSize: "18px",
+      lineHeight: "120%",
+      letterSpacing: "0.15px",
+
+      color: "#263238",
+
+      "&:hover": {
+        background: "#E2E7EA",
+        cursor: "pointer",
+
+        borderRadius: 8,
+
+                transition: "all 0.5s",
+            },
+        },
     textActive: {
       fontFamily: "Open Sans",
       fontWeight: "bold",

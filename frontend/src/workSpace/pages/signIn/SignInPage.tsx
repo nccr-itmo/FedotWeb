@@ -1,12 +1,12 @@
-import React, {useEffect} from "react";
-import {useWindowSize} from "use-hooks";
-import {useHistory} from "react-router-dom";
-import {useSelector} from "react-redux";
+import React, { useEffect } from "react";
+import { useWindowSize } from "use-hooks";
+import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 import scss from "./signInPage.module.scss";
 
 import SignInPageTitle from "./title/SignInPageTitle";
 import SignInPagePaper from "./paper/SignInPagePaper";
-import {StateType} from "../../../redux/store";
+import { StateType } from "../../../redux/store";
 
 const SignInPage = () => {
   const history = useHistory();

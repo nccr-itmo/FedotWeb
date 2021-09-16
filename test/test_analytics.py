@@ -11,7 +11,7 @@ def test_results_endpoint(client):
     results_plot = client.get(f'api/analytics/results/{case_id}/{pipeline_id}').json
 
     assert 'series' in results_plot
-    assert 1 <= len(results_plot['series']) <= 2
+    assert 1 <= len(results_plot['series']) <= 3
     assert 'options' in results_plot
 
 

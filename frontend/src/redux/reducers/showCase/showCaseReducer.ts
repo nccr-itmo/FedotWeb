@@ -1,7 +1,7 @@
-import {ThunkAction} from "redux-thunk";
-import {StateType} from "../../store";
-import {ICase, ICaseArr} from "../../../API/showCase/showCasesInterface";
-import {showCasesAPI} from "../../../API/showCase/showCasesAPI";
+import { ThunkAction } from "redux-thunk";
+import { StateType } from "../../store";
+import { ICase, ICaseArr } from "../../../API/showCase/showCasesInterface";
+import { showCasesAPI } from "../../../API/showCase/showCasesAPI";
 
 const SHOW_CASES_ARR = "SHOW_CASES_ARR";
 const SHOW_CASE_BY_ID = "SHOW_CASE_BY_ID";
@@ -60,14 +60,18 @@ export const getShowCasesArr = (): ThunkTypeAsync => {
   };
 };
 
-export const getShowCaseById = (caseId: string): ThunkTypeAsync => {
+export const getShowCaseById = (caseId: string | null): ThunkTypeAsync => {
   return async (dispatch) => {
-    try {
-      let caseById = await showCasesAPI.getShowCaseById(caseId);
-      // console.log(`caseById`, caseById);
-      dispatch(actionsCases.showCaseById(caseById));
-    } catch (err) {
-      console.error(err);
+    dispatch(actionsCases.showCaseById(null));
+    if (caseId !== null) {
+      try {
+        let caseById = await showCasesAPI.getShowCaseById(caseId);
+        dispatch(actionsCases.showCaseById(caseById));
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      dispatch(actionsCases.showCaseById(null));
     }
   };
 };

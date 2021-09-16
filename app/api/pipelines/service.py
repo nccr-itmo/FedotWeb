@@ -27,12 +27,16 @@ def pipeline_by_uid(uid: str) -> Optional[Pipeline]:
     if pipeline_dict is None:
         return None
 
+    dict_fitted_operations = None
     if current_app.config['CONFIG_NAME'] == 'test':
         dict_fitted_operations = storage.db.dict_fitted_operations.find_one({'uid': str(uid)})
     else:
-        fs = gridfs.GridFS(storage.db)
-        file = fs.find_one({'filename': str(uid), 'type': 'dict_fitted_operations'}).read()
-        dict_fitted_operations = json_util.loads(file)
+        try:
+            fs = gridfs.GridFS(storage.db)
+            file = fs.find_one({'filename': str(uid), 'type': 'dict_fitted_operations'}).read()
+            dict_fitted_operations = json_util.loads(file)
+        except AttributeError as ex:
+            print(f'dict_fitted_operations not found for {uid}')
 
     if dict_fitted_operations:
         for key in dict_fitted_operations:
@@ -52,10 +56,10 @@ def validate_pipeline(pipeline: Pipeline) -> Tuple[bool, str]:
         return False, str(ex)
 
 
-def create_pipeline(db, uid: str, pipeline: Pipeline):
+def create_pipeline(db, uid: str, pipeline: Pipeline, overwrite=False):
     is_new = True
     existing_uid = db.pipelines.find_one({'uid': str(uid)})
-    if existing_uid:
+    if existing_uid and not overwrite:
         is_new = False
 
     dumped_json, dict_fitted_operations = pipeline.save()
@@ -69,22 +73,27 @@ def create_pipeline(db, uid: str, pipeline: Pipeline):
 
     if is_new:
         dict_pipeline = json.loads(dumped_json)
-        _add_pipeline_to_db(db, uid, dict_pipeline, dict_fitted_operations)
+        _add_pipeline_to_db(db, uid, dict_pipeline, dict_fitted_operations, overwrite=overwrite)
     else:
         warnings.warn('Cannot create new pipeline')
 
     return uid, is_new
 
 
-def _add_pipeline_to_db(db, uid, dict_pipeline, dict_fitted_operations, init_db=False):
+def _add_pipeline_to_db(db, uid, dict_pipeline, dict_fitted_operations, init_db=False, overwrite=False):
     dict_pipeline['uid'] = str(uid)
     if init_db:
         db.pipelines.remove({'uid': uid})
     else:
-        try:
-            db.pipelines.insert_one(dict_pipeline)
-        except DuplicateKeyError:
-            print(f'Pipeline {str(uid)} already exists')
+        is_exists = db.pipelines.find_one({'uid': uid}) is not None
+        if is_exists and overwrite:
+            db.pipelines.remove({'uid': uid})
+            is_exists = False
+        if not is_exists:
+            try:
+                db.pipelines.insert_one(dict_pipeline)
+            except DuplicateKeyError as ex:
+                print(f'Suddenly, pipeline {str(uid)} already exists: {ex}')
 
     if dict_fitted_operations is not None:
         try:

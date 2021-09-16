@@ -1,8 +1,8 @@
-import React, {memo, useCallback} from "react";
+import React, { memo, useCallback } from "react";
 import scss from "./leftMenu.module.scss";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import {createStyles, makeStyles} from "@material-ui/core/styles";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
 import GradientIcon from "@material-ui/icons/Gradient";
 import TerrainIcon from "@material-ui/icons/Terrain";
 import AccountTreeIcon from "@material-ui/icons/AccountTree";
@@ -11,19 +11,20 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import LeftMenuMenuIcon from "./menuIcon/LeftMenuMenuIcon";
 import LogoMenu from "../../../data/images/LogoMenu.png";
 import LeftMenuButtonItem from "./buttonItem/LeftMenuButtonItem";
-import {selectPage} from "../../../redux/reducers/leftMenu/leftMenuReducer";
-import {StateType} from "../../../redux/store";
-import {setHistoryToggle} from "./../../../redux/reducers/sandBox/sandBoxReducer";
+import { selectPage } from "../../../redux/reducers/leftMenu/leftMenuReducer";
+import { StateType } from "../../../redux/store";
+import { setHistoryToggle } from "./../../../redux/reducers/sandBox/sandBoxReducer";
+import { getShowCaseById } from "../../../redux/reducers/showCase/showCaseReducer";
 
 const useStyles = makeStyles(() =>
-    createStyles({
-        icon: {
-            width: 24,
-            height: 24,
+  createStyles({
+    icon: {
+      width: 24,
+      height: 24,
 
-            color: "#FFFFFF",
-        },
-    })
+      color: "#FFFFFF",
+    },
+  })
 );
 
 const LeftMenu = () => {
@@ -54,6 +55,10 @@ const LeftMenu = () => {
     (page: "Showcase" | "Sandbox" | "FEDOT" | "Settings") => {
       dispatch(setHistoryToggle(false));
       dispatch(selectPage(page));
+
+      if (page === "Sandbox") {
+        dispatch(getShowCaseById("scoring"));
+      }
     },
     [dispatch]
   );
@@ -64,18 +69,32 @@ const LeftMenu = () => {
       <div className={scss.line} />
       <img src={LogoMenu} alt="Fedot" className={scss.logo} />
       <div className={scss.buttonsPosition}>
-        {btnArr.map((btn) => (
-          <LeftMenuButtonItem
-            key={btn.name + "q"}
-            title={btn.name}
-            selected={page_selected === btn.name}
-            buttonTextCss={scss.buttonText}
-            buttonWidthCss={scss.buttonWidth}
-            onClick={onMenuClick}
-          >
-            {btn.icon}
-          </LeftMenuButtonItem>
-        ))}
+        {btnArr.map((btn) =>
+          btn.name === "FEDOT" ? (
+            <a href={"https://github.com/nccr-itmo/FEDOT"} key={btn.name + "q"}>
+              <LeftMenuButtonItem
+                title={btn.name}
+                selected={page_selected === btn.name}
+                buttonTextCss={scss.buttonText}
+                buttonWidthCss={scss.buttonWidth}
+                onClick={onMenuClick}
+              >
+                {btn.icon}
+              </LeftMenuButtonItem>
+            </a>
+          ) : (
+            <LeftMenuButtonItem
+              key={btn.name + "q"}
+              title={btn.name}
+              selected={page_selected === btn.name}
+              buttonTextCss={scss.buttonText}
+              buttonWidthCss={scss.buttonWidth}
+              onClick={onMenuClick}
+            >
+              {btn.icon}
+            </LeftMenuButtonItem>
+          )
+        )}
       </div>
       <div className={scss.line} />
     </section>

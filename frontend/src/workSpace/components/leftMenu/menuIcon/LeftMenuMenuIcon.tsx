@@ -1,6 +1,6 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 
-import {createStyles, makeStyles} from "@material-ui/core/styles";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
 import MenuIcon from "@material-ui/icons/Menu";
 
 const useStyles = makeStyles(() =>

@@ -1,24 +1,24 @@
-import React, {FC, memo} from "react";
+import React, { FC, memo } from "react";
 import scss from "./buttonSiginInUpFormik.module.scss";
 
-import {createStyles, makeStyles} from "@material-ui/core/styles";
-import {Button} from "@material-ui/core";
+import { createStyles, makeStyles } from "@material-ui/core/styles";
+import { Button } from "@material-ui/core";
 
 const useStyles = makeStyles(() =>
-    createStyles({
-        root: {},
-        cancelButton: {
-            padding: "0 20px",
+  createStyles({
+    root: {},
+    cancelButton: {
+      padding: "0 20px",
 
-            textTransform: "none",
-            borderRadius: 4,
-            background: "#F4F5F6",
-        },
-        submitButton: {
-            padding: "0 16px",
+      textTransform: "none",
+      borderRadius: 4,
+      background: "#F4F5F6",
+    },
+    submitButton: {
+      padding: "0 16px",
 
-            textTransform: "none",
-            borderRadius: 4,
+      textTransform: "none",
+      borderRadius: 4,
       background: "#828282",
 
       "&:disabled": {

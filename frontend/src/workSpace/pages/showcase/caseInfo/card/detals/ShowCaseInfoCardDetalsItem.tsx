@@ -1,7 +1,7 @@
-import React, {FC, memo} from "react";
+import React, { FC, memo } from "react";
 import scss from "./showCaseInfoCardDetals.module.scss";
 
-import {Grid, Tooltip} from "@material-ui/core";
+import { Grid, Tooltip } from "@material-ui/core";
 
 interface IShowCaseInfoCardDetalsItem {
   metric: string;

@@ -1,3 +1,5 @@
+import json
+import os
 from pathlib import Path
 
 from app.api.pipelines.pipeline_convert_utils import pipeline_to_graph
@@ -29,23 +31,18 @@ def test_validate_pipeline_endpoint(client):
 
 
 def test_add_pipeline_endpoint(client):
-    non_existing_uid = 'new_pipeline'
+    with open(os.path.join(project_root(), 'test', 'data', 'graph_example.json')) as f:
+        graph = json.load(f)
+
+    basic_uid = 'new_pipeline'
     graph = {
-        'uid': non_existing_uid,
-        'nodes': []
+        'nodes': graph['nodes'],
+        'edges': graph['edges']
+
     }
     response = client.post('api/pipelines/add', json=graph).json
     assert response['is_new'] is True
-    assert response['uid'] == non_existing_uid
-
-    existing_uid = 'new_pipeline'
-    graph = {
-        'uid': existing_uid,
-        'nodes': []
-    }
-    response = client.post(f'api/pipelines/add', json=graph).json
-    assert response['is_new'] is False
-    assert response['uid'] == existing_uid
+    assert response['uid'] != basic_uid
 
 
 def test_pipeline_image_endpoint(client):

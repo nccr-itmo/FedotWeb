@@ -76,13 +76,18 @@ def replace_deprecated_values(graph_node: dict, depr_values: list = ['Infinity',
 
 def _graph_node_to_pipeline_node(graph_node: dict, existing_graph_nodes: dict, pipeline_nodes):
     is_primary = len(graph_node['parents']) == 0
-
     if is_primary:
         pipeline_node = PrimaryNode(graph_node['model_name'])
     else:
         parent_pipeline_nodes = []
         for parent_id in graph_node['parents']:
-            parent_node = existing_graph_nodes[parent_id]
+            parent_node = [n for n in existing_graph_nodes if n['id'] == parent_id]
+
+            if len(parent_node) == 0:
+                continue
+            else:
+                parent_node = parent_node[0]
+
             parent_pipeline_node = _graph_node_to_pipeline_node(parent_node, existing_graph_nodes, pipeline_nodes)
 
             # check is parent node already created

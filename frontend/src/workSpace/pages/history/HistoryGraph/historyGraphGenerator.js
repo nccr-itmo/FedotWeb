@@ -10,6 +10,7 @@ export function runHistory(
   nodeHoverTooltip,
   onClick
 ) {
+
   let links = linksData.map((d) => Object.assign({}, d));
   let nodes = nodesData.map((d) => Object.assign({}, d));
   let nodesIndividual = nodes.filter((item) => item.type === "individual");
@@ -17,6 +18,7 @@ export function runHistory(
   let generations = [];
   nodesIndividual.forEach((item) => generations.push(item.gen_id));
 
+ 
   // оставляем уникальные значения
   let uniqGenerations = Array.from(new Set(generations));
 
@@ -36,9 +38,11 @@ export function runHistory(
     );
 
   // Set up an SVG group so that we can translate the final graph.
-  let svgGroup = svg.append("g").on("click", (e, d) => {
+  let svgGroup = svg.append("g").on("click", (e, d) => {   
     if (e.target && e.target.textContent.includes("pipeline")) {
-      onClick(e.target.textContent);
+      nodesIndividual.find(item=>item.uid === e.target.textContent)
+      // onClick(e.target.textContent);
+      onClick(nodesIndividual.find(item=>item.uid === e.target.textContent));
     }
   });
 
@@ -72,9 +76,10 @@ export function runHistory(
     g.setParent(nameG, generation);
 
     nodesIndividual.forEach((item) => {
+      // console.log(`item`, item)
       if (generation === item.gen_id) {
         g.setNode(item.uid, {
-          label: item.uid,
+          label: item.uid,   
           labelStyle: "font-size: 36px; cursor: pointer",
           class: "type-TK",
           shape: "rect",
@@ -88,7 +93,7 @@ export function runHistory(
   nodesOperator.forEach((item) => {
     const label = item.name[0][0].toUpperCase();
     g.setNode(item.uid, {
-      label: label,
+      label: label, 
       labelStyle: "font-size: 60px; cursor: pointer",
       class: `operator-${label}`,
       shape: "circle",
@@ -145,40 +150,40 @@ export function runHistory(
   /**
    * Блок добавления и удаления подсказки на Граф
    */
-  const tooltip = document.querySelector("#graph-tooltip");
-  if (!tooltip) {
-    const tooltipDiv = document.createElement("div");
-    tooltipDiv.classList.add(styles.tooltip);
-    tooltipDiv.style.opacity = "0";
-    tooltipDiv.id = "graph-tooltip";
-    document.body.appendChild(tooltipDiv);
-  }
-  const div = d3.select("#graph-tooltip");
+  // const tooltip = document.querySelector("#graph-tooltip");
+  // if (!tooltip) {
+  //   const tooltipDiv = document.createElement("div");
+  //   tooltipDiv.classList.add(styles.tooltip);
+  //   tooltipDiv.style.opacity = "0";
+  //   tooltipDiv.id = "graph-tooltip";
+  //   document.body.appendChild(tooltipDiv);
+  // }
+  // const div = d3.select("#graph-tooltip");
 
-  //показать рядом с нужным Узлом
-  const addTooltip = (hoverTooltip, d, x, y) => {
-    div.transition().duration(200).style("opacity", 0.9);
-    div
-      .html(hoverTooltip(d))
-      .style("left", `${x}px`)
-      .style("top", `${y - 28}px`);
-  };
-  //скрыть
-  const removeTooltip = () => {
-    div.transition().duration(200).style("opacity", 0);
-  };
+  // //показать рядом с нужным Узлом
+  // const addTooltip = (hoverTooltip, d, x, y) => {
+  //   div.transition().duration(200).style("opacity", 0.9);
+  //   div
+  //     .html(hoverTooltip(d))
+  //     .style("left", `${x}px`)
+  //     .style("top", `${y - 28}px`);
+  // };
+  // //скрыть
+  // const removeTooltip = () => {
+  //   div.transition().duration(200).style("opacity", 0);
+  // };
   /**
    * Конец блока добавления и удаления Подсказки
    */
 
   svgGroup
     .selectAll("g.node")
-    .on("mouseover", (event, d) => {
-      addTooltip(nodeHoverTooltip, d, event.pageX, event.pageY);
-    })
-    .on("mouseout", () => {
-      removeTooltip();
-    });
+    // .on("mouseover", (event, d) => {
+    //   addTooltip(nodeHoverTooltip, d, event.pageX, event.pageY);
+    // })
+    // .on("mouseout", () => {
+    //   removeTooltip();
+    // });
 
   return {
     destroy: () => {

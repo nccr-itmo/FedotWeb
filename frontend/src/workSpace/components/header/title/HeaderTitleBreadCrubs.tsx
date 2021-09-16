@@ -1,11 +1,11 @@
-import React, {FC, memo} from "react";
-import {useDispatch} from "react-redux";
+import React, { FC, memo } from "react";
+import { useDispatch } from "react-redux";
 import scss from "./headerTitle.module.scss";
 
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 
-import {setHistoryToggle} from "./../../../../redux/reducers/sandBox/sandBoxReducer";
+import { setHistoryToggle } from "./../../../../redux/reducers/sandBox/sandBoxReducer";
 
 interface I {
   linksAndTitles: { title: string; link: string }[];

@@ -1,4 +1,4 @@
-import React, {FC, memo} from "react";
+import React, { FC, memo } from "react";
 import scss from "./pageTitle.module.scss";
 
 interface IPageTitle {

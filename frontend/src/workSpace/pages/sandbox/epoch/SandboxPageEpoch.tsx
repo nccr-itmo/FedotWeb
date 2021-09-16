@@ -1,7 +1,7 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 import scss from "./sandboxPageEpoch.module.scss";
 
-import {createStyles, makeStyles} from "@material-ui/core/styles";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
 import TimelineIcon from "@material-ui/icons/Timeline";
 import SandboxPageEpochSlider from "./SandboxPageEpochSlider";
 

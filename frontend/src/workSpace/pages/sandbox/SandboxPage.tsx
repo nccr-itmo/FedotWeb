@@ -1,6 +1,6 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 
-import {makeStyles} from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 import GraphEditor from "./GraphEditor/GraphEditor";
 import SandboxPageEpoch from "./epoch/SandboxPageEpoch";

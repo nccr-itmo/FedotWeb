@@ -16,7 +16,7 @@ def create_default_history(db=None, opt_times=None):
     mock_list = []
 
     if opt_times is None:
-        opt_times = [1.5, 0.1, 0.7]
+        opt_times = [2, 1, 1]
 
     mock_list.append(
         _init_composer_history_for_case(db=db, history_id='scoring', dataset_name='scoring',
@@ -83,20 +83,35 @@ def _init_composer_history_for_case(db, history_id, task, metric, dataset_name, 
     mock_dct['dicts_fitted_operations'] = []
 
     data = get_input_data(dataset_name=dataset_name, sample_type='train')
+
+    best_fitness = None
+
     for i, pipeline_template in enumerate(history.historical_pipelines):
-        struct_id = pipeline_template.unique_pipeline_id
+        is_best = False
+        pipeline_uid = pipeline_template.unique_pipeline_id
+
+        fitness = history.all_historical_fitness[i]
+        if best_fitness is None or fitness < best_fitness:
+            best_fitness = fitness
+            is_best = True
+
+            case = db.cases.find_one({'case_id': history_id})
+            db.cases.remove({'case_id': history_id})
+            case['pipeline_id'] = pipeline_uid
+            db.cases.insert_one(case)
+
         existing_pipeline = False
         if db:
-            existing_pipeline = is_pipeline_exists(db, struct_id)
+            existing_pipeline = is_pipeline_exists(db, pipeline_uid)
         if not existing_pipeline:
             print(i)
             pipeline = Pipeline()
             pipeline_template.convert_to_pipeline(pipeline)
             pipeline.fit(data)
             if db:
-                create_pipeline(db, struct_id, pipeline)
+                create_pipeline(db, pipeline_uid, pipeline)
             else:
-                pipeline_dict, dict_fitted_operations = _extract_pipeline_with_fitted_operations(pipeline, struct_id)
+                pipeline_dict, dict_fitted_operations = _extract_pipeline_with_fitted_operations(pipeline, pipeline_uid)
                 mock_dct['pipelines_dict'].append(pipeline_dict)
                 mock_dct['dicts_fitted_operations'].append(dict_fitted_operations)
 

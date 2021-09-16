@@ -1,14 +1,17 @@
-import React, {useEffect, useRef, useState} from "react";
-import {runDirectedGraph} from "./directedGraphGenerator";
+import React, { useEffect, useRef, useState } from "react";
+import { runDirectedGraph } from "./directedGraphGenerator";
 import styles from "./directedGraph.module.scss";
 import Loader from "react-loader-spinner";
 import ContextMenu from "../GraphEditorContextMenu/ContextMenu";
-import {ClickAwayListener} from "@material-ui/core";
-import {useDispatch, useSelector} from "react-redux";
+import { ClickAwayListener } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
 import GraphEditorModal from "../GraphEditorModal/GraphEditorModal";
-import {StateType} from "../../../../../redux/store";
-import {actionsSandbox} from "../../../../../redux/reducers/sandBox/sandbox-reducer";
-import {setEditOrAddFormOpened, setInitialValuesEditForm,} from "../../../../../redux/reducers/sandBox/sandBoxReducer";
+import { StateType } from "../../../../../redux/store";
+import { actionsSandbox } from "../../../../../redux/reducers/sandBox/sandbox-reducer";
+import {
+  setEditOrAddFormOpened,
+  setInitialValuesEditForm,
+} from "../../../../../redux/reducers/sandBox/sandBoxReducer";
 
 export type EdgeDataType = {
   source: number;
@@ -141,7 +144,7 @@ const GraphEditorDirectedGraph = ({
     }
     // открываю form (timeout для обновления формы)
     setTimeout(() => {
-      dispatch(setEditOrAddFormOpened({isOpen: true, type: "edit"}));
+      dispatch(setEditOrAddFormOpened({ isOpen: true, type: "edit" }));
     }, 300);
 
     // закрываю меню
@@ -156,13 +159,13 @@ const GraphEditorDirectedGraph = ({
   return (
     <div ref={containerRef} className={styles.container}>
       {showLoader && (
-          <Loader
-              type="MutatingDots"
-              color="#263238"
-              secondaryColor="#0199E4"
-              height={100}
-              width={100}
-          />
+        <Loader
+          type="MutatingDots"
+          color="#263238"
+          secondaryColor="#0199E4"
+          height={100}
+          width={100}
+        />
       )}
       {/* контекстное меню узла  */}
       <ClickAwayListener onClickAway={handleClickAwayNodeContext}>
@@ -171,7 +174,7 @@ const GraphEditorDirectedGraph = ({
             <ContextMenu
               buttons={[
                 { name: "edit", action: openEditNode },
-                { name: "params", action: handleSecondActionNode },
+                // { name: "params", action: handleSecondActionNode },
                 { name: "delete", action: deleteNode },
               ]}
               offset={dataContext?.offset}

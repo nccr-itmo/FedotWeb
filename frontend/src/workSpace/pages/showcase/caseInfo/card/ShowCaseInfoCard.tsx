@@ -1,12 +1,12 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 import scss from "./showCaseInfoCard.module.scss";
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 
-import {Grid} from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 
 import ShowCaseInfoCardStructure from "./structure/ShowCaseInfoCardStructure";
 import ShowCaseInfoCardDetals from "./detals/ShowCaseInfoCardDetals";
-import {StateType} from "../../../../../redux/store";
+import { StateType } from "../../../../../redux/store";
 import ShowCaseInfoCardEditBtn from "./editButton/ShowCaseInfoCardEditBtn";
 
 const ShowCaseInfoCard = () => {

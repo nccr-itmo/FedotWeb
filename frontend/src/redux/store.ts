@@ -1,11 +1,12 @@
-import {applyMiddleware, combineReducers, createStore} from "redux";
+import { applyMiddleware, combineReducers, createStore } from "redux";
 import thunkMiddleware from "redux-thunk";
-import {composeWithDevTools} from "redux-devtools-extension";
+import { composeWithDevTools } from "redux-devtools-extension";
 
 // redux-persist---
-import {persistReducer, persistStore} from "redux-persist";
+import { persistStore, persistReducer } from "redux-persist";
 // import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import storage from "redux-persist/lib/storage/session"; // sessionStorage
+
 //------
 import authReducer from "./reducers/auth/authReducer";
 import leftMenuReducer from "./reducers/leftMenu/leftMenuReducer";

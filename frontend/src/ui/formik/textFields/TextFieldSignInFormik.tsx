@@ -1,28 +1,28 @@
-import React, {FC, memo} from "react";
+import React, { FC, memo } from "react";
 import scss from "./textFieldSignInFormik.module.scss";
 
-import {createStyles, makeStyles} from "@material-ui/core/styles";
-import {TextField} from "@material-ui/core";
+import { createStyles, makeStyles } from "@material-ui/core/styles";
+import { TextField } from "@material-ui/core";
 
-import {OnChangeFormikType} from "../onChangeFormikType";
+import { OnChangeFormikType } from "../onChangeFormikType";
 
 const useStyles = makeStyles(() =>
-    createStyles({
-        cssOutlinedInput: {
-            "&:not(hover):not($disabled):not($cssFocused):not($error) $notchedOutline":
-                {
-                    borderColor: "#90A4AE", //default
-                },
-            "&:hover:not($disabled):not($cssFocused):not($error) $notchedOutline": {
-                borderColor: "rgba(0, 0, 0, 0.7)", //hovered
-            },
-            "&$cssFocused $notchedOutline": {
-                borderColor: "#263238", //focused
-            },
+  createStyles({
+    cssOutlinedInput: {
+      "&:not(hover):not($disabled):not($cssFocused):not($error) $notchedOutline":
+        {
+          borderColor: "#90A4AE", //default
         },
-        notchedOutline: {},
-        cssFocused: {},
-        error: {},
+      "&:hover:not($disabled):not($cssFocused):not($error) $notchedOutline": {
+        borderColor: "rgba(0, 0, 0, 0.7)", //hovered
+      },
+      "&$cssFocused $notchedOutline": {
+        borderColor: "#263238", //focused
+      },
+    },
+    notchedOutline: {},
+    cssFocused: {},
+    error: {},
     disabled: {},
   })
 );

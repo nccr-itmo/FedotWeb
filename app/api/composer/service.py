@@ -27,7 +27,7 @@ def showcase_item_from_db(case_id: str) -> ShowcaseItem:
     return item
 
 
-def composer_history_for_case(case_id: str) -> OptHistory:
+def composer_history_for_case(case_id: str, validate_history: bool = False) -> OptHistory:
     case = showcase_item_from_db(case_id)
     task = case.metadata.task_name
     metric = case.metadata.metric_name
@@ -41,7 +41,7 @@ def composer_history_for_case(case_id: str) -> OptHistory:
         saved_history = json_util.loads(file)
 
     if not saved_history:
-        history = run_composer(task, metric, dataset_name, time=1)
+        history = run_composer(task, metric, dataset_name, time=1.0)
         _save_to_db(storage.db, case_id, history)
     else:
         if current_app.config['CONFIG_NAME'] == 'test':
@@ -50,15 +50,17 @@ def composer_history_for_case(case_id: str) -> OptHistory:
             history = pickle.loads(saved_history)
 
     data = get_input_data(dataset_name=dataset_name, sample_type='train')
-    for i, pipeline_template in enumerate(history.historical_pipelines):
-        struct_id = pipeline_template.unique_pipeline_id
-        existing_pipeline = is_pipeline_exists(storage.db, struct_id)
-        if not existing_pipeline:
-            print(i)
-            pipeline = Pipeline()
-            pipeline_template.convert_to_pipeline(pipeline)
-            pipeline.fit(data)
-            create_pipeline(storage.db, struct_id, pipeline)
+
+    if validate_history:
+        for i, pipeline_template in enumerate(history.historical_pipelines):
+            struct_id = pipeline_template.unique_pipeline_id
+            existing_pipeline = is_pipeline_exists(storage.db, struct_id)
+            if not existing_pipeline:
+                print(i)
+                pipeline = Pipeline()
+                pipeline_template.convert_to_pipeline(pipeline)
+                pipeline.fit(data)
+                create_pipeline(storage.db, struct_id, pipeline)
 
     return history
 
@@ -72,7 +74,7 @@ def _save_to_db(db, history_id, history):
 
 
 def run_composer(task, metric, dataset_name, time):
-    pop_size = 3
+    pop_size = 10
     num_of_generations = 5
     learning_time = time
 
@@ -81,8 +83,8 @@ def run_composer(task, metric, dataset_name, time):
                        composer_params={'composer_metric': metric,
                                         'pop_size': pop_size,
                                         'num_of_generations': num_of_generations,
-                                        'max_arity': 2,
-                                        'max_depth': 2})
+                                        'max_arity': 3,
+                                        'max_depth': 5})
     auto_model.fit(features=f'{project_root()}/data/{dataset_name}/{dataset_name}_train.csv',
                    target='target')
     history = auto_model.history

@@ -1,21 +1,21 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 import scss from "./signInForm.module.scss";
-import {useFormik} from "formik";
-import {useDispatch, useSelector} from "react-redux";
+import { useFormik } from "formik";
+import { useDispatch, useSelector } from "react-redux";
 import clsx from "clsx";
 
-import {Grid} from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 
-import {validationSchema} from "./validationSiginIn";
+import { validationSchema } from "./validationSiginIn";
 import TextFieldSignInFormik from "../../../../ui/formik/textFields/TextFieldSignInFormik";
 import ButtonSiginInUpFormik from "../../../../ui/formik/buttons/ButtonSiginInUpFormik";
-import {authUser} from "../../../../redux/reducers/auth/authReducer";
-import {StateType} from "../../../../redux/store";
+import { authUser } from "../../../../redux/reducers/auth/authReducer";
+import { StateType } from "../../../../redux/store";
 
 const SignInForm = () => {
   const dispatch = useDispatch();
 
-  const {user_login_error} = useSelector((state: StateType) => state.auth);
+  const { user_login_error } = useSelector((state: StateType) => state.auth);
 
   const formik = useFormik({
     initialValues: {

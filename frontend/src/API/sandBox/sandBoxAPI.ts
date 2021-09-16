@@ -1,5 +1,5 @@
-import {instance} from "../baseURL";
-import {IEpoch} from "./sandBoxInterface";
+import { instance } from "../baseURL";
+import { IEpoch } from "./sandBoxInterface";
 
 export const sandBoxAPI = {
   async getSandBoxEpoch(caseId: string) {
@@ -22,15 +22,3 @@ export const sandBoxAPI = {
     }
   },
 };
-
-//   return instance
-//     .get<ICaseArr[]>(`sandbox/epoch/${caseId}`)
-//     .then((res) => {
-//       // console.log("res.headers", res);
-//       return res.data;
-//     })
-//     .catch((error: any) => {
-//       console.error(`error`, error.response.data);
-//       return Promise.reject(error);
-//     });
-// }}

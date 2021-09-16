@@ -1,30 +1,30 @@
-import React, {memo, useEffect} from "react";
-import {useDispatch, useSelector} from "react-redux";
+import React, { memo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import {createStyles, makeStyles} from "@material-ui/core/styles";
-import {CircularProgress, Paper} from "@material-ui/core";
-import {getResults} from "../../../../../redux/reducers/sandBox/sandBoxReducer";
-import {StateType} from "../../../../../redux/store";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
+import { CircularProgress, Paper } from "@material-ui/core";
+import { getResults } from "../../../../../redux/reducers/sandBox/sandBoxReducer";
+import { StateType } from "../../../../../redux/store";
 import SandboxPageChartsResultScatter from "./scatter/SandboxPageChartsResultScatter";
 import SandboxPageChartsResultLine from "./line/SandboxPageChartsResultLine";
 
 const useStyles = makeStyles(() =>
-    createStyles({
-        paper: {
-            padding: "16px 20px",
-        },
-        title: {
-            fontSize: "18px",
-            lineHeight: "150%",
-            letterSpacing: "0.15px",
+  createStyles({
+    paper: {
+      padding: "16px 20px",
+    },
+    title: {
+      fontSize: "18px",
+      lineHeight: "150%",
+      letterSpacing: "0.15px",
 
-            color: "#263238",
-        },
-        progress: {
-            height: 350,
+      color: "#263238",
+    },
+    progress: {
+      height: 350,
 
-            display: "flex",
-            alignItems: "center",
+      display: "flex",
+      alignItems: "center",
       justifyContent: "center",
     },
   })

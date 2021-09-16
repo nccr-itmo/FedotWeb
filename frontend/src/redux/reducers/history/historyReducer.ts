@@ -1,7 +1,7 @@
-import {ThunkAction} from "redux-thunk";
-import {analyticsAPI} from "../../../API/analytics/analyticsAPI";
-import {IGeneration} from "../../../API/analytics/analyticsInterface";
-import {StateType} from "../../store";
+import { ThunkAction } from "redux-thunk";
+import { analyticsAPI } from "../../../API/analytics/analyticsAPI";
+import { IGeneration } from "../../../API/analytics/analyticsInterface";
+import { StateType } from "../../store";
 
 const HISTORY_GENERATIONS_PHENO = "HISTORY_GENERATIONS_PHENO";
 const HISTORY_GENERATIONS_GENO = "HISTORY_GENERATIONS_GENO";

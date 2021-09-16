@@ -1,9 +1,9 @@
-import React, {memo} from "react";
+import React, { memo } from "react";
 import scss from "./headerTitle.module.scss";
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 
 import GradientIcon from "@material-ui/icons/Gradient";
-import {StateType} from "../../../../redux/store";
+import { StateType } from "../../../../redux/store";
 import HeaderTitleBreadCrubs from "./HeaderTitleBreadCrubs";
 
 const linksHistory = [{ link: "/ws/sandbox/", title: "Sandbox" }];
