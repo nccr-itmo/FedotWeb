@@ -149,31 +149,31 @@ def get_modelling_results(
     if baseline_pipeline:
         _, baseline_prediction = _test_prediction_for_pipeline(case, baseline_pipeline)
     y_bnd: Optional[Tuple[int, ...]] = None
-    if case.metadata.task_name == 'classification':
-        y_title: str = 'Probability'
-        x_title: str = 'Item'
+    x_title: str
+    y_title: str
+    if (case_task_name := case.metadata.task_name) == 'classification':
+        x_title, y_title = 'Item', 'Probability'
         y_bnd = (0, 1)
-    elif case.metadata.task_name == 'regression':
-        y_title: str = 'Value'
-        x_title: str = 'Item'
-    elif case.metadata.task_name == 'ts_forecasting':
-        y_title: str = 'Value'
-        x_title: str = 'Time step'
+    elif case_task_name == 'regression':
+        x_title, y_title = 'Item', 'Value'
+    elif case_task_name == 'ts_forecasting':
+        x_title, y_title = 'Time step', 'Value'
     else:
-        raise NotImplementedError(f'Task {case.metadata.task_name} not supported')
+        raise NotImplementedError(f'Task {case_task_name} not supported')
 
-    if case.metadata.task_name == 'ts_forecasting':
-        plot_type: str = 'line'
-        y: List[Integral] = list(prediction.predict[0, :])
-        y_baseline: Optional[List[Integral]] = list(baseline_prediction.predict[0, :]) if baseline_prediction else None
-
+    plot_type: str
+    y: List[Integral]
+    y_baseline: Optional[List[Integral]]
+    if case_task_name == 'ts_forecasting':
+        plot_type = 'line'
+        y = list(prediction.predict[0, :])
+        y_baseline = list(baseline_prediction.predict[0, :]) if baseline_prediction else None
     else:
-        plot_type: str = 'scatter'
-        y: List[Integral] = prediction.predict.tolist()
-        y_baseline: Optional[List[Integral]] = baseline_prediction.predict.tolist() if baseline_prediction else None
+        plot_type = 'scatter'
+        y = prediction.predict.tolist()
+        y_baseline = baseline_prediction.predict.tolist() if baseline_prediction else None
 
-    x: List[int] = list(range(len(prediction.predict)))
-    x = x[:max_items_in_plot]
+    x: List[int] = [idx for idx, _ in enumerate(prediction.predict[:max_items_in_plot])]
     y = y[:max_items_in_plot]
     ys: List[List[Integral]] = [y]
     names: List[str] = ['Candidate']
