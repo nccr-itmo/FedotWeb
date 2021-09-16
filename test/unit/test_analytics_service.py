@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import pytest
 from app.api.analytics.service import (_make_chart_dicts,
                                        _make_chart_dicts_for_boxplot,
@@ -8,6 +9,8 @@ from app.api.analytics.service import (_make_chart_dicts,
                                        get_modelling_results,
                                        get_population_analytics,
                                        get_quality_analytics)
+from app.api.showcase.models import ShowcaseItem
+from numpy.typing import NDArray
 
 
 @dataclass
@@ -146,7 +149,19 @@ class MockOptHistory:
     individuals: list
 
 
-def test_get_quality_analytics(monkeypatch):
+@pytest.fixture
+def plot_data_fixture(monkeypatch):
+    @dataclass
+    class MockPlotData:
+        series: list
+        options: list
+
+        def __iter__(self):
+            return iter((self.series, self.options))
+    monkeypatch.setattr("app.api.analytics.service.PlotData", MockPlotData)
+
+
+def test_get_quality_analytics(monkeypatch, plot_data_fixture):
     individuals = [
         [
             MockIndividual(fitness)
@@ -171,16 +186,6 @@ def test_get_quality_analytics(monkeypatch):
     monkeypatch.setattr(
         "app.api.analytics.service._make_chart_dicts", mock_make_chart_dicts
     )
-
-    @dataclass
-    class MockPlotData:
-        series: list
-        options: list
-
-        def __iter__(self):
-            return iter((self.series, self.options))
-
-    monkeypatch.setattr("app.api.analytics.service.PlotData", MockPlotData)
 
     x, y = get_quality_analytics("_")
     assert x and y, "MockPlotData is empty"
@@ -247,6 +252,17 @@ def test_get_population_analytics(monkeypatch):
                 assert yi == pytest.approx(etalon_yi), f"Incorrect y mapping: {y=} != {etalon_y=}"
 
 
+@dataclass
+class MockMetaData:
+    dataset_name: str = ""
+    task_name: str = ""
+
+
+@dataclass
+class MockShowcaseItem:
+    metadata: MockMetaData = MockMetaData()
+
+
 def test_test_prediction_for_pipeline(monkeypatch):
     @dataclass
     class MockInputData:
@@ -262,14 +278,6 @@ def test_test_prediction_for_pipeline(monkeypatch):
     monkeypatch.setattr(
         "app.api.analytics.service.get_input_data", mock_get_input_data
     )
-
-    @dataclass
-    class MockMetaData:
-        dataset_name: str = ""
-
-    @dataclass
-    class MockShowcaseItem:
-        metadata: MockMetaData = MockMetaData()
     monkeypatch.setattr(
         "app.api.analytics.service.ShowcaseItem", MockShowcaseItem
     )
@@ -324,3 +332,79 @@ def test_test_prediction_for_pipeline(monkeypatch):
                 _test_prediction_for_pipeline(case, pipeline)
         else:
             target(*_test_prediction_for_pipeline(case, pipeline))
+
+
+def test_get_modelling_results(monkeypatch, plot_data_fixture):
+    @dataclass
+    class MockOutputData:
+        predict: NDArray
+
+    @dataclass
+    class MockPipeline:
+        is_base: bool = False
+        pass
+    monkeypatch.setattr(
+        "app.api.analytics.service.Pipeline", MockPipeline
+    )
+
+    def mock_test_prediction_for_pipeline(case: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
+        if pipeline:
+            if pipeline.is_base:
+                if case.metadata.task_name == "ts_forecasting":
+                    return None, MockOutputData(np.array([[10, 11, 12], [13, 14, 15]]))
+                return None, MockOutputData(np.array([22, 33, 44, 55, 66, 77]))
+            else:
+                if case.metadata.task_name == "ts_forecasting":
+                    return None, MockOutputData(np.array([[1, 2, 3], [4, 5, 6]]))
+                return None, MockOutputData(np.array([1, 2, 3, 4, 5, 6]))
+        return None, None
+    monkeypatch.setattr(
+        "app.api.analytics.service._test_prediction_for_pipeline", mock_test_prediction_for_pipeline
+    )
+    monkeypatch.setattr(
+        "app.api.analytics.service.ShowcaseItem", MockShowcaseItem
+    )
+
+    def mock_make_chart_dicts(x, ys, *args, **kwargs):
+        return x, ys
+    monkeypatch.setattr(
+        "app.api.analytics.service._make_chart_dicts", mock_make_chart_dicts
+    )
+
+    etalon_x1 = [0, 1, 2, 3, 4, 5]
+    etalon_x2 = [0, 1]
+    input_tests = [
+        ("classification", None, None, [], []),
+        ("classification", None, MockPipeline(), [], []),
+        ("classification", MockPipeline(), None, etalon_x1, [[1, 2, 3, 4, 5, 6]]),
+        ("classification", MockPipeline(), MockPipeline(is_base=True), etalon_x1, [[1, 2, 3, 4, 5, 6], [22, 33, 44, 55, 66, 77]]),
+
+        ("regression", None, None, [], []),
+        ("regression", None, MockPipeline(), [], []),
+        ("regression", MockPipeline(), None, etalon_x1, [[1, 2, 3, 4, 5, 6]]),
+        ("regression", MockPipeline(), MockPipeline(is_base=True), etalon_x1, [[1, 2, 3, 4, 5, 6], [22, 33, 44, 55, 66, 77]]),
+
+        ("ts_forecasting", None, None, [], []),
+        ("ts_forecasting", None, MockPipeline(), [], []),
+        ("ts_forecasting", MockPipeline(), None, etalon_x2, [[1, 2, 3]]),
+        ("ts_forecasting", MockPipeline(), MockPipeline(is_base=True), etalon_x2, [[1, 2, 3], [10, 11, 12]]),
+
+        ("exception", None, None, [], []),
+        ("exception", None, MockPipeline(), [], []),
+        ("exception", MockPipeline(), None, [], []),
+        ("exception", MockPipeline(), MockPipeline(is_base=True), [], []),
+    ]
+    for task_name, pipeline, baseline_pipeline, etalon_x, etalon_y in input_tests:
+        case = MockShowcaseItem(MockMetaData("", task_name))
+        if task_name == "exception":
+            with pytest.raises(NotImplementedError):
+                get_modelling_results(case, pipeline, baseline_pipeline)
+        elif pipeline is None:
+            with pytest.raises(AttributeError):
+                get_modelling_results(case, pipeline, baseline_pipeline)
+        else:
+            x, y = get_modelling_results(case, pipeline, baseline_pipeline)
+            assert len(x) == len(etalon_x), f"x length error: len(x)={len(x)} != len(etalon_x)={len(etalon_x)}"
+            assert x == etalon_x, f"Incorrect x mapping: {x=} != {etalon_x=}"
+            assert len(y) == len(etalon_y), f"y length error: len(y)={len(y)} != len(etalon_y)={len(etalon_y)}"
+            assert y == etalon_y, f"Incorrect y mapping: {y=} != {etalon_y=}"
