@@ -191,6 +191,60 @@ def test_get_quality_analytics(monkeypatch):
     assert y == pytest.approx(etalon_y), f"Incorrect y mapping: {y} != {etalon_y}"
 
 
+def test_get_population_analytics(monkeypatch):
+    individuals = [
+        [
+            MockIndividual(fitness, MockIndividualGraph(depth))
+            for fitness, depth in ind_lst
+        ]
+        for ind_lst in [
+            [(1.1111, 1), (2.2229999, 4)],
+            [(3.3366, 9)],
+            [(5.54321, 25), (-6.123456, 36), (10.54346, 100)]
+        ]
+    ]
+
+    def mock_composer_history_for_case(case_id: str):
+        history = MockOptHistory(individuals)
+        return history
+    monkeypatch.setattr(
+        "app.api.analytics.service.composer_history_for_case", mock_composer_history_for_case
+    )
+
+    def mock_make_chart_dicts_for_boxplot(x, ys, *args, **kwargs) -> Tuple[list, list]:
+        return x, ys
+    monkeypatch.setattr(
+        "app.api.analytics.service._make_chart_dicts_for_boxplot", mock_make_chart_dicts_for_boxplot
+    )
+
+    @dataclass
+    class MockBoxPlotData:
+        series: Tuple[list, list]
+
+        def __iter__(self):
+            return iter(self.series)
+
+    monkeypatch.setattr("app.api.analytics.service.BoxPlotData", MockBoxPlotData)
+    test_inputs = [
+        ("pheno", [0, 1, 2], [[1.1111, 2.2229999], [3.3366], [5.54321, 6.123456, 10.54346]]),
+        ("geno", [0, 1, 2], [[1, 4], [9], [25, 36, 100]]),
+        ("exception", [], [])
+    ]
+    for analytic_type, etalon_x, etalon_y in test_inputs:
+        if analytic_type == "exception" and not etalon_x and not etalon_y:
+            with pytest.raises(ValueError):
+                get_population_analytics("", analytic_type)
+        else:
+            x, y = get_population_analytics("", analytic_type)
+            assert x and y, "MockBoxPlotData is empty"
+            assert len(x) == len(y), "x and y should have the same shape"
+            assert len(x) == len(etalon_x), f"x length error: len(x)={len(x)} != len(etalon_x)={len(etalon_x)}"
+            assert x == etalon_x, f"Incorrect x mapping: {x=} != {etalon_x=}"
+            assert len(y) == len(etalon_y), f"y length error: y={len(y)} != etalon_y={len(etalon_y)}"
+            for yi, etalon_yi in zip(y, etalon_y):
+                assert yi == pytest.approx(etalon_yi), f"Incorrect y mapping: {y=} != {etalon_y=}"
+
+
 def test_test_prediction_for_pipeline(monkeypatch):
     @dataclass
     class MockInputData:
