@@ -186,9 +186,11 @@ def test_get_quality_analytics(monkeypatch):
     assert x and y, "MockPlotData is empty"
     assert len(x) == len(y), "x and y should have the same shape"
     etalon_x = [0, 1, 2]
-    assert x == etalon_x, f"Incorrect x mapping: {x} != {etalon_x}"
+    assert len(x) == len(etalon_x), f"x length error: len(x)={len(x)} != len(etalon_x)={len(etalon_x)}"
+    assert x == etalon_x, f"Incorrect x mapping: {x=} != {etalon_x=}"
     etalon_y = [1.111, 3.337, 5.543]
-    assert y == pytest.approx(etalon_y), f"Incorrect y mapping: {y} != {etalon_y}"
+    assert len(y) == len(etalon_y), f"y length error: len(y)={len(y)} != len(etalon_y)={len(etalon_y)}"
+    assert y == pytest.approx(etalon_y), f"Incorrect y mapping: {y=} != {etalon_y=}"
 
 
 def test_get_population_analytics(monkeypatch):
@@ -240,7 +242,7 @@ def test_get_population_analytics(monkeypatch):
             assert len(x) == len(y), "x and y should have the same shape"
             assert len(x) == len(etalon_x), f"x length error: len(x)={len(x)} != len(etalon_x)={len(etalon_x)}"
             assert x == etalon_x, f"Incorrect x mapping: {x=} != {etalon_x=}"
-            assert len(y) == len(etalon_y), f"y length error: y={len(y)} != etalon_y={len(etalon_y)}"
+            assert len(y) == len(etalon_y), f"y length error: len(y)={len(y)} != len(etalon_y)={len(etalon_y)}"
             for yi, etalon_yi in zip(y, etalon_y):
                 assert yi == pytest.approx(etalon_yi), f"Incorrect y mapping: {y=} != {etalon_y=}"
 
