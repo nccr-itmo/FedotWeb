@@ -212,12 +212,9 @@ def test_test_prediction_for_pipeline(monkeypatch):
 
     @dataclass
     class MockPipeline:
-        fitted_data: MockInputData = None
         is_fitted: bool = False
 
-        def fit(self, input_data: MockInputData):
-            fitted_data = input_data
-            fitted_data.val = "changed"
+        def fit(self, *args, **kwargs):
             self.is_fitted = True
 
         def predict(self, *args, **kwargs):
