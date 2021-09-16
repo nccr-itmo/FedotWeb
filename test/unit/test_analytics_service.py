@@ -130,22 +130,34 @@ def test_make_chart_dicts(case: InputCase):
     assert result_options == etalon_options, f"Options aren't equal: {result_options} != {etalon_options}"
 
 
-def test_get_quality_analytics(monkeypatch):
-    @dataclass
-    class MockIndividualFitness:
-        fitness: int
+@dataclass
+class MockIndividualGraph:
+    depth: int
 
+
+@dataclass
+class MockIndividual:
+    fitness: float
+    graph: MockIndividualGraph = None
+
+
+@dataclass
+class MockOptHistory:
+    individuals: list
+
+
+def test_get_quality_analytics(monkeypatch):
     individuals = [
         [
-            MockIndividualFitness(fitness)
+            MockIndividual(fitness)
             for fitness in fitness_lst
         ]
-        for fitness_lst in [[1.1111, 2.2229999], [3.3366], [5.54321, 6.123456, 10.54346]]
+        for fitness_lst in [
+            [1.1111, 2.2229999],
+            [3.3366],
+            [5.54321, 6.123456, 10.54346]
+        ]
     ]
-
-    @dataclass
-    class MockOptHistory:
-        individuals: list
 
     def mock_composer_history_for_case(case_id: str):
         history = MockOptHistory(individuals)
@@ -176,7 +188,7 @@ def test_get_quality_analytics(monkeypatch):
     etalon_x = [0, 1, 2]
     assert x == etalon_x, f"Incorrect x mapping: {x} != {etalon_x}"
     etalon_y = [1.111, 3.337, 5.543]
-    assert y == etalon_y, f"Incorrect y mapping: {y} != {etalon_y}"
+    assert y == pytest.approx(etalon_y), f"Incorrect y mapping: {y} != {etalon_y}"
 
 
 def test_test_prediction_for_pipeline(monkeypatch):
