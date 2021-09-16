@@ -157,16 +157,15 @@ def get_modelling_results(
     if baseline_pipeline:
         _, baseline_prediction = _test_prediction_for_pipeline(case, baseline_pipeline)
     y_bnd: Optional[Tuple[int, ...]] = None
-    if case.metadata.task_name == 'classification':
-        y_title: str = 'Probability'
-        x_title: str = 'Item'
+    x_title: str
+    y_title: str
+    if (case_task_name := case.metadata.task_name) == 'classification':
+        x_title, y_title = 'Item', 'Probability'
         y_bnd = (0, 1)
-    elif case.metadata.task_name == 'regression':
-        y_title: str = 'Value'
-        x_title: str = 'Item'
-    elif case.metadata.task_name == 'ts_forecasting':
-        y_title: str = 'Value'
-        x_title: str = 'Time step'
+    elif case_task_name == 'regression':
+        x_title, y_title = 'Item', 'Value'
+    elif case_task_name == 'ts_forecasting':
+        x_title, y_title = 'Time step', 'Value'
     else:
         raise NotImplementedError(f'Task {case.metadata.task_name} not supported')
 
@@ -183,8 +182,7 @@ def get_modelling_results(
             y_baseline = list(baseline_prediction.predict) if baseline_prediction else None
         y_obs = obs
 
-    x: List[int] = list(range(len(prediction.predict)))
-    x = x[:max_items_in_plot]
+    x: List[int] = [idx for idx, _ in enumerate(prediction.predict[:max_items_in_plot])]
     y = y[:max_items_in_plot]
     ys: List[List[Integral]] = [y]
     names: List[str] = ['Candidate']
