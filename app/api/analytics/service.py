@@ -86,7 +86,7 @@ def _make_chart_dicts(
 
 
 def get_quality_analytics(case_id: str) -> PlotData:
-    history: OptHistory = composer_history_for_case(case_id)
+    history = composer_history_for_case(case_id)
 
     y: List[Integral] = [
         round(abs(min(i.fitness for i in gen)), 3)
@@ -105,7 +105,7 @@ def get_quality_analytics(case_id: str) -> PlotData:
 
 
 def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
-    history: OptHistory = composer_history_for_case(case_id)
+    history = composer_history_for_case(case_id)
 
     y_gen: List[List[Integral]]
     if analytic_type == 'pheno':
@@ -129,7 +129,7 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
 def _test_prediction_for_pipeline(
     case: ShowcaseItem, pipeline: Optional[Pipeline]
 ) -> Tuple[Optional[InputData], Optional[OutputData]]:
-    test_data: Optional[InputData] = get_input_data(dataset_name=case.metadata.dataset_name, sample_type='test')
+    test_data = get_input_data(dataset_name=case.metadata.dataset_name, sample_type='test')
     prediction: Optional[OutputData] = None
     if pipeline:
         train_data: Optional[InputData] = get_input_data(
