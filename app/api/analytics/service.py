@@ -153,15 +153,6 @@ def get_modelling_results(
 ) -> PlotData:
     test_data, prediction = _test_prediction_for_pipeline(case, pipeline)
 
-    obs: npt.NDArray
-    if case.metadata.task_name == 'ts_forecasting':
-        obs = test_data.target
-    else:
-        obs = [float(o[0]) for o in test_data.target]
-
-    baseline_prediction: Optional[OutputData] = None
-    if baseline_pipeline:
-        _, baseline_prediction = _test_prediction_for_pipeline(case, baseline_pipeline)
     y_bnd: Optional[Tuple[int, int]] = None
     x_title: str
     y_title: str
@@ -177,18 +168,20 @@ def get_modelling_results(
         raise NotImplementedError(f'Task {case_task_name} not supported')
 
     plot_type: str
-    y: List[Integral]
-    y_baseline: Optional[List[Integral]]
     if case_task_name == 'ts_forecasting':
         plot_type = 'line'
-        y = list(prediction.predict[0, :])  # TODO: Doesn't [0, :] == [0]? I suppose they does
-        y_baseline = list(baseline_prediction.predict[0, :]) if baseline_prediction else None
-        y_obs = [float(o) for o in obs] if obs is not None else None
     else:
         plot_type = 'scatter'
-        y = prediction.predict.tolist()  # TODO: maybe we should still slice it? And y_baseline as well?
-        y_baseline = list(baseline_prediction.predict) if baseline_prediction else None  # And maybe use .tolist()?
-        y_obs = obs
+    y: List[Integral] = prediction.predict.ravel().astype(float).tolist()
+    baseline_prediction: Optional[OutputData] = None
+    if baseline_pipeline:
+        _, baseline_prediction = _test_prediction_for_pipeline(case, baseline_pipeline)
+    y_baseline: Optional[List[Integral]] = (
+        baseline_prediction.predict.ravel().astype(float).tolist() if baseline_prediction else None
+    )
+    y_obs: Optional[List[Integral]] = (
+        test_data.target.ravel().astype(float).tolist() if getattr(test_data, "target", None) is not None else None
+    )
 
     x: List[int] = [idx for idx, _ in enumerate(prediction.predict[:max_items_in_plot])]
     y = y[:max_items_in_plot]
@@ -198,7 +191,7 @@ def get_modelling_results(
         y_baseline = y_baseline[:max_items_in_plot]
         ys.append(y_baseline)
         names.append('Baseline')
-    if obs is not None:
+    if y_obs is not None:
         y_obs = y_obs[:max_items_in_plot]
         ys.append(y_obs)
         names.append('Observations')
