@@ -40,13 +40,6 @@ def _make_chart_dicts_for_boxplot(
     ]
 
 
-def _process_y_value(y):
-    y_new = y
-    if isinstance(y, list) or isinstance(y, np.ndarray):
-        y_new = y[0]
-    return round(y_new, 3)
-
-
 def _make_chart_dicts(
     x: List[int],
     ys: List[List[Integral]],
@@ -181,9 +174,12 @@ def get_modelling_results(
     elif case_task_name == 'ts_forecasting':
         x_title, y_title = 'Time step', 'Value'
     else:
-        raise NotImplementedError(f'Task {case.metadata.task_name} not supported')
+        raise NotImplementedError(f'Task {case_task_name} not supported')
 
-    if case.metadata.task_name == 'ts_forecasting':
+    plot_type: str
+    y: List[Integral]
+    y_baseline: Optional[List[Integral]]
+    if case_task_name == 'ts_forecasting':
         plot_type = 'line'
         y = list(prediction.predict[0, :])  # TODO: Doesn't [0, :] == [0]? I suppose they does
         y_baseline = list(baseline_prediction.predict[0, :]) if baseline_prediction else None
