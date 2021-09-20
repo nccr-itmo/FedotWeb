@@ -52,7 +52,7 @@ def _make_chart_dicts(
             'name': names[idx1],
             'data':
                 [round(_, 3) for _ in y]
-                if plot_type == "line"
+                if plot_type == 'line'
                 else [[x[idx2], round(_, 3)] for idx2, _ in enumerate(y)]
         }
         for idx1, y in enumerate(ys)
@@ -175,7 +175,7 @@ def get_modelling_results(
         baseline_prediction.predict.ravel().astype(float).tolist() if baseline_prediction else None
     )
     y_obs: Optional[List[Integral]] = (
-        test_data.target.ravel().astype(float).tolist() if getattr(test_data, "target", None) is not None else None
+        test_data.target.ravel().astype(float).tolist() if getattr(test_data, 'target', None) is not None else None
     )
 
     x: List[int] = [idx for idx, _ in enumerate(prediction.predict[:max_items_in_plot])]
