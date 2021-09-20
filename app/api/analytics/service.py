@@ -28,7 +28,7 @@ def _make_chart_dicts_for_boxplot(
     x: List[int],
     ys: List[List[Integral]],
     x_title: str, y_title: str  # TODO: are these needed?
-) -> List[Dict[str, Union[str, int, List[Integral]]]]:
+) -> List[Dict]:
     return [
         {
             'x': [round(_, 3) for _ in y],
@@ -44,15 +44,10 @@ def _make_chart_dicts(
     x: List[int],
     ys: List[List[Integral]],
     names: List[str],
-    x_title: str, y_title: str, plot_type: str, y_bnd=None
-) -> Tuple[
-    List[Dict[str, Union[str, List[Integral], List[List[Union[int, Integral]]]]]],
-    Dict[str, Dict[str, Any]]
-]:
-    series: List[Dict[
-        str,
-        Union[str, List[Integral], List[List[Union[int, Integral]]]]
-    ]] = [
+    x_title: str, y_title: str, plot_type: str,
+    y_bnd: Optional[Tuple[int, int]] = None
+) -> Tuple[List[Dict], Dict]:
+    series: List[Dict] = [
         {
             'name': names[idx1],
             'data':
@@ -64,12 +59,12 @@ def _make_chart_dicts(
     ]
 
     if not y_bnd:
-        min_y: float = min(_process_y_value(min(y)) for y in ys) * 0.95
-        max_y: float = max(_process_y_value(max(y)) for y in ys) * 1.05
+        min_y = min(_process_y_value(min(y)) for y in ys) * 0.95
+        max_y = max(_process_y_value(max(y)) for y in ys) * 1.05
     else:
         min_y, max_y = y_bnd
 
-    options: Dict[str, Dict[str, Any]] = {
+    options: Dict = {
         'chart': {
             'type': plot_type
         },
