@@ -137,10 +137,10 @@ def _test_prediction_for_pipeline(
     test_data: Optional[InputData] = get_input_data(dataset_name=case.metadata.dataset_name, sample_type='test')
     prediction: Optional[OutputData] = None
     if pipeline:
-        train_data: Optional[InputData]
-        if not pipeline.is_fitted and (train_data := get_input_data(
+        train_data: Optional[InputData] = get_input_data(
             dataset_name=case.metadata.dataset_name, sample_type='train'
-        )):
+        )
+        if not pipeline.is_fitted and train_data:
             pipeline.fit(train_data)
         prediction = pipeline.predict(test_data)
     return test_data, prediction
@@ -165,7 +165,8 @@ def get_modelling_results(
     y_bnd: Optional[Tuple[int, int]] = None
     x_title: str
     y_title: str
-    if (case_task_name := case.metadata.task_name) == 'classification':
+    case_task_name: str = case.metadata.task_name
+    if case_task_name == 'classification':
         x_title, y_title = 'Item', 'Probability'
         y_bnd = (0, 1)
     elif case_task_name == 'regression':
