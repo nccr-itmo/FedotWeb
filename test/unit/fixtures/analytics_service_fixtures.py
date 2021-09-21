@@ -37,7 +37,7 @@ def composer_history_for_case_fixture(monkeypatch):
         ]
     ]
 
-    def mock_composer_history_for_case(case_id: str):
+    def mock_composer_history_for_case(case_id: str, *args, **kwargs):
         return MockOptHistory(individuals)
     monkeypatch.setattr(
         'app.api.analytics.service.composer_history_for_case', mock_composer_history_for_case
