@@ -117,7 +117,7 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
 
     x: List[int] = [idx for idx, _ in enumerate(history.individuals)]
 
-    series: List[Dict[str, Union[str, int, List[Integral]]]] = _make_chart_dicts_for_boxplot(
+    series: List[Dict] = _make_chart_dicts_for_boxplot(
         x=x, ys=y_gen,
         x_title='Epochs', y_title='Fitness'
     )
