@@ -94,7 +94,7 @@ def test_make_chart_dicts_for_boxplot(case: ChartTestCase):
         }
         for idx, y in enumerate(case.ys)
     ]
-    assert result == correct, f'Chart dicts aren\'t equal: {result} != {correct}'
+    _assert_arrays(result, correct, 'chart')
 
 
 @pytest.mark.parametrize('case', CHART_TEST_CASES)
@@ -143,8 +143,8 @@ def test_make_chart_dicts(case: ChartTestCase):
                 'max': max_y
             }
         }
-    assert result_series == correct_series, f'Series aren\'t equal: {result_series} != {correct_series}'
-    assert result_options == correct_options, f'Options aren\'t equal: {result_options} != {correct_options}'
+    _assert_arrays(result_series, correct_series, 'series')
+    _assert_arrays(result_options, correct_options, 'options')
 
 
 @pytest.fixture
