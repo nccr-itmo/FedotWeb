@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List, Optional
 
 import numpy as np
 
@@ -11,12 +12,12 @@ class MockIndividualGraph:
 @dataclass
 class MockIndividual:
     fitness: float
-    graph: MockIndividualGraph = None
+    graph: MockIndividualGraph
 
 
 @dataclass
 class MockOptHistory:
-    individuals: list
+    individuals: List[List[MockIndividual]]
 
 
 @dataclass
