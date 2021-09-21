@@ -17,17 +17,17 @@ from fedot.core.pipelines.pipeline import Pipeline
 from numpy.typing import NDArray
 
 
-def _assert_arrays(given: List[Any], etalon: List[Any], label: str = "x"):
+def _assert_arrays(given: List[Any], etalon: List[Any], label: str = 'x'):
     assert len(given) == len(etalon), (
-        f"{label} length error: len({label})={len(given)} != len(etalon_{label})={len(etalon)}"
+        f'{label} length error: len({label})={len(given)} != len(etalon_{label})={len(etalon)}'
     )
     if given and type(given[0]) is list:
         for idx, (giveni, etaloni) in enumerate(zip(given, etalon)):
             assert giveni == pytest.approx(etaloni), (
-                f"Incorrect {label}{idx} mapping: {label}{idx}={giveni} != etalon_{label}{idx}={etaloni}"
+                f'Incorrect {label}{idx} mapping: {label}{idx}={giveni} != etalon_{label}{idx}={etaloni}'
             )
     else:
-        assert given == pytest.approx(etalon), f"Incorrect {label} mapping: {label}={given} != etalon_{label}={etalon}"
+        assert given == pytest.approx(etalon), f'Incorrect {label} mapping: {label}={given} != etalon_{label}={etalon}'
 
 
 @dataclass
@@ -48,9 +48,9 @@ MAKE_CHART_DICTS_INPUTS = [
             [4, 5, 6],
             [7, 8, 9]
         ],
-        x_title="x",
-        y_title="y",
-        names=["test", "sample", "cases"],
+        x_title='x',
+        y_title='y',
+        names=['test', 'sample', 'cases'],
         y_bnd=None
     ),
     ChartInputCase(
@@ -60,9 +60,9 @@ MAKE_CHART_DICTS_INPUTS = [
             [4.5, 5.6, 6.7],
             [7.8, 8.9, 9.10]
         ],
-        x_title="x",
-        y_title="y",
-        names=["test", "sample", "cases"],
+        x_title='x',
+        y_title='y',
+        names=['test', 'sample', 'cases'],
         y_bnd=(1.14, 9.555)
     ),
     ChartInputCase(
@@ -72,15 +72,15 @@ MAKE_CHART_DICTS_INPUTS = [
             [0.5555, 0, 0],
             [7, 8, 9]
         ],
-        x_title="x",
-        y_title="y",
-        names=["test", "sample", "cases"],
+        x_title='x',
+        y_title='y',
+        names=['test', 'sample', 'cases'],
         y_bnd=(0, 9.45)
     )
 ]
 
 
-@pytest.mark.parametrize("case", MAKE_CHART_DICTS_INPUTS)
+@pytest.mark.parametrize('case', MAKE_CHART_DICTS_INPUTS)
 def test_make_chart_dicts_for_boxplot(case: ChartInputCase):
     result = _make_chart_dicts_for_boxplot(
         x=case.x,
@@ -97,10 +97,10 @@ def test_make_chart_dicts_for_boxplot(case: ChartInputCase):
         }
         for idx, y in enumerate(case.ys)
     ]
-    assert result == etalon, f"Chart dicts aren't equal: {result} != {etalon}"
+    assert result == etalon, f'Chart dicts aren\'t equal: {result} != {etalon}'
 
 
-@pytest.mark.parametrize("case", MAKE_CHART_DICTS_INPUTS)
+@pytest.mark.parametrize('case', MAKE_CHART_DICTS_INPUTS)
 def test_make_chart_dicts(case: ChartInputCase):
     plot_types = ['line', 'other']
     for plot_type in plot_types:
@@ -118,7 +118,7 @@ def test_make_chart_dicts(case: ChartInputCase):
                 'name': case.names[idx1],
                 'data':
                     [round(_, 3) for _ in y]
-                    if plot_type == "line"
+                    if plot_type == 'line'
                     else [[case.x[idx2], round(_, 3)] for idx2, _ in enumerate(y)]
             }
             for idx1, y in enumerate(case.ys)
@@ -146,8 +146,8 @@ def test_make_chart_dicts(case: ChartInputCase):
                 'max': max_y
             }
         }
-    assert result_series == etalon_series, f"Series aren't equal: {result_series} != {etalon_series}"
-    assert result_options == etalon_options, f"Options aren't equal: {result_options} != {etalon_options}"
+    assert result_series == etalon_series, f'Series aren\'t equal: {result_series} != {etalon_series}'
+    assert result_options == etalon_options, f'Options aren\'t equal: {result_options} != {etalon_options}'
 
 
 @pytest.fixture
@@ -160,7 +160,7 @@ def plot_data_fixture(monkeypatch):
         def __iter__(self):
             return iter((self.series, self.options))
 
-    monkeypatch.setattr("app.api.analytics.service.PlotData", MockPlotData)
+    monkeypatch.setattr('app.api.analytics.service.PlotData', MockPlotData)
 
 
 @dataclass
@@ -196,7 +196,7 @@ def composer_history_for_case_fixture(monkeypatch):
     def mock_composer_history_for_case(case_id: str):
         return MockOptHistory(individuals)
     monkeypatch.setattr(
-        "app.api.analytics.service.composer_history_for_case", mock_composer_history_for_case
+        'app.api.analytics.service.composer_history_for_case', mock_composer_history_for_case
     )
 
 
@@ -205,13 +205,13 @@ def chart_dicts_fixture(monkeypatch):
     def mock_make_chart_dicts(x, ys, *args, **kwargs):
         return x, ys
     monkeypatch.setattr(
-        "app.api.analytics.service._make_chart_dicts", mock_make_chart_dicts
+        'app.api.analytics.service._make_chart_dicts', mock_make_chart_dicts
     )
 
     def mock_make_chart_dicts_for_boxplot(x, ys, *args, **kwargs) -> Tuple[list, list]:
         return x, ys
     monkeypatch.setattr(
-        "app.api.analytics.service._make_chart_dicts_for_boxplot", mock_make_chart_dicts_for_boxplot
+        'app.api.analytics.service._make_chart_dicts_for_boxplot', mock_make_chart_dicts_for_boxplot
     )
 
 
@@ -220,14 +220,14 @@ def test_get_quality_analytics(
     composer_history_for_case_fixture,
     chart_dicts_fixture
 ):
-    x, y = get_quality_analytics("_")
+    x, y = get_quality_analytics('_')
     y = y[0]
-    assert x and y, "MockPlotData is empty"
-    assert len(x) == len(y), "x and y should have the same shape"
+    assert x and y, 'MockPlotData is empty'
+    assert len(x) == len(y), 'x and y should have the same shape'
     etalon_x = [0, 1, 2]
-    _assert_arrays(x, etalon_x, "x")
+    _assert_arrays(x, etalon_x, 'x')
     etalon_y = [1.111, 3.337, 6.123]
-    _assert_arrays(y, etalon_y, "y")
+    _assert_arrays(y, etalon_y, 'y')
 
 
 @pytest.fixture
@@ -239,7 +239,7 @@ def box_plot_data_fixture(monkeypatch):
         def __iter__(self):
             return iter(self.series)
 
-    monkeypatch.setattr("app.api.analytics.service.BoxPlotData", MockBoxPlotData)
+    monkeypatch.setattr('app.api.analytics.service.BoxPlotData', MockBoxPlotData)
 
 
 @dataclass
@@ -251,17 +251,17 @@ class PopulationAnalytics:
 
 GET_POPULATION_ANALYTICS_INPUTS = [
     PopulationAnalytics(
-        analytic_type="pheno",
+        analytic_type='pheno',
         etalon_x=[0, 1, 2],
         etalon_y=[[1.1111, 2.2229999], [3.3366], [5.54321, 6.123456, 10.54346]]
     ),
     PopulationAnalytics(
-        analytic_type="geno",
+        analytic_type='geno',
         etalon_x=[0, 1, 2],
         etalon_y=[[1, 4], [9], [25, 36, 100]]
     ),
     PopulationAnalytics(
-        analytic_type="exception",
+        analytic_type='exception',
         etalon_x=[],
         etalon_y=[]
     )
@@ -276,22 +276,21 @@ def test_get_population_analytics(
     chart_dicts_fixture,
     box_plot_data_fixture
 ):
-    if case.analytic_type == "exception" and not case.etalon_x and not case.etalon_y:
+    if case.analytic_type == 'exception' and not case.etalon_x and not case.etalon_y:
         with pytest.raises(ValueError):
-            get_population_analytics("", case.analytic_type)
+            get_population_analytics('', case.analytic_type)
     else:
-        x, y = get_population_analytics("", case.analytic_type)
-        assert x and y, "MockBoxPlotData is empty"
-        assert len(x) == len(y), "x and y should have the same shape"
-        _assert_arrays(x, case.etalon_x, "x")
-        _assert_arrays(y, case.etalon_y, "y")
-
+        x, y = get_population_analytics('', case.analytic_type)
+        assert x and y, 'MockBoxPlotData is empty'
+        assert len(x) == len(y), 'x and y should have the same shape'
+        _assert_arrays(x, case.etalon_x, 'x')
+        _assert_arrays(y, case.etalon_y, 'y')
 
 
 @dataclass
 class MockMetaData:
-    dataset_name: str = ""
-    task_name: str = ""
+    dataset_name: str = ''
+    task_name: str = ''
 
 
 @dataclass
@@ -302,7 +301,7 @@ class MockShowcaseItem:
 @pytest.fixture
 def showcase_item_fixture(monkeypatch):
     monkeypatch.setattr(
-        "app.api.analytics.service.ShowcaseItem", MockShowcaseItem
+        'app.api.analytics.service.ShowcaseItem', MockShowcaseItem
     )
 
 
@@ -319,10 +318,10 @@ class MockOutputData:
 @pytest.fixture
 def input_output_data_fixture(monkeypatch):
     monkeypatch.setattr(
-        "app.api.analytics.service.InputData", MockInputData
+        'app.api.analytics.service.InputData', MockInputData
     )
     monkeypatch.setattr(
-        "app.api.analytics.service.OutputData", MockOutputData
+        'app.api.analytics.service.OutputData', MockOutputData
     )
 
 
@@ -343,7 +342,7 @@ class MockPipeline:
 @pytest.fixture
 def pipeline_fixture(monkeypatch):
     monkeypatch.setattr(
-        "app.api.analytics.service.Pipeline", MockPipeline
+        'app.api.analytics.service.Pipeline', MockPipeline
     )
 
 
@@ -363,7 +362,7 @@ TEST_PREDICTION_FOR_PIPELINE_INPUTS = [
     PredictionForPipeline(
         showcase=MockShowcaseItem(MockMetaData(dataset_name=None)),
         pipeline=MockPipeline(),
-        target="exception"
+        target='exception'
     ),
     PredictionForPipeline(
         showcase=MockShowcaseItem(MockMetaData(dataset_name=None)),
@@ -398,11 +397,11 @@ def test_test_prediction_for_pipeline(
     pipeline_fixture
 ):
     def mock_get_input_data(*args, **kwargs):
-        if kwargs["dataset_name"] is None:
+        if kwargs['dataset_name'] is None:
             return None
         return MockInputData()
     monkeypatch.setattr(
-        "app.api.analytics.service.get_input_data", mock_get_input_data
+        'app.api.analytics.service.get_input_data', mock_get_input_data
     )
     if type(case.target) is str:
         with pytest.raises(ValueError):
@@ -422,28 +421,28 @@ class ModellingResults:
 
 GET_MODELLING_RESULTS_INPUTS = [
     ModellingResults(
-        task_name="classification",
+        task_name='classification',
         pipeline=None,
         baseline_pipeline=None,
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="classification",
+        task_name='classification',
         pipeline=None,
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="classification",
+        task_name='classification',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
         etalon_x=[0, 1, 2, 3, 4, 5],
         etalon_y=[[1, 2, 3, 4, 5, 6]]
     ),
     ModellingResults(
-        task_name="classification",
+        task_name='classification',
         pipeline=MockPipeline(),
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[0, 1, 2, 3, 4, 5],
@@ -451,28 +450,28 @@ GET_MODELLING_RESULTS_INPUTS = [
     ),
 
     ModellingResults(
-        task_name="regression",
+        task_name='regression',
         pipeline=None,
         baseline_pipeline=None,
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="regression",
+        task_name='regression',
         pipeline=None,
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="regression",
+        task_name='regression',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
         etalon_x=[0, 1, 2, 3, 4, 5],
         etalon_y=[[1, 2, 3, 4, 5, 6]]
     ),
     ModellingResults(
-        task_name="regression",
+        task_name='regression',
         pipeline=MockPipeline,
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[0, 1, 2, 3, 4, 5],
@@ -480,28 +479,28 @@ GET_MODELLING_RESULTS_INPUTS = [
     ),
 
     ModellingResults(
-        task_name="ts_forecasting",
+        task_name='ts_forecasting',
         pipeline=None,
         baseline_pipeline=None,
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="ts_forecasting",
+        task_name='ts_forecasting',
         pipeline=None,
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="ts_forecasting",
+        task_name='ts_forecasting',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
         etalon_x=[0],
         etalon_y=[[1, 2, 3, 4, 5, 6]]
     ),
     ModellingResults(
-        task_name="ts_forecasting",
+        task_name='ts_forecasting',
         pipeline=MockPipeline(),
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[0],
@@ -509,28 +508,28 @@ GET_MODELLING_RESULTS_INPUTS = [
     ),
 
     ModellingResults(
-        task_name="exception",
+        task_name='exception',
         pipeline=None,
         baseline_pipeline=None,
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="exception",
+        task_name='exception',
         pipeline=None,
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="exception",
+        task_name='exception',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
         etalon_x=[],
         etalon_y=[]
     ),
     ModellingResults(
-        task_name="exception",
+        task_name='exception',
         pipeline=MockPipeline(),
         baseline_pipeline=MockPipeline(is_base=True),
         etalon_x=[],
@@ -552,26 +551,26 @@ def test_get_modelling_results(
         is_base: bool = False
         pass
     monkeypatch.setattr(
-        "app.api.analytics.service.Pipeline", MockPipeline
+        'app.api.analytics.service.Pipeline', MockPipeline
     )
 
     def mock_test_prediction_for_pipeline(showcase: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
         if pipeline:
             if pipeline.is_base:
-                if showcase.metadata.task_name == "ts_forecasting":
+                if showcase.metadata.task_name == 'ts_forecasting':
                     return None, MockOutputData(np.array([[10, 11, 12, 13, 14, 15]]))
                 return None, MockOutputData(np.array([[22], [33], [44], [55], [66], [77]]))
             else:
-                if showcase.metadata.task_name == "ts_forecasting":
+                if showcase.metadata.task_name == 'ts_forecasting':
                     return None, MockOutputData(np.array([[1, 2, 3, 4, 5, 6]]))
                 return None, MockOutputData(np.array([[1], [2], [3], [4], [5], [6]]))
         return None, None
     monkeypatch.setattr(
-        "app.api.analytics.service._test_prediction_for_pipeline", mock_test_prediction_for_pipeline
+        'app.api.analytics.service._test_prediction_for_pipeline', mock_test_prediction_for_pipeline
     )
 
-    showcase = MockShowcaseItem(MockMetaData("", case.task_name))
-    if case.task_name == "exception":
+    showcase = MockShowcaseItem(MockMetaData('', case.task_name))
+    if case.task_name == 'exception':
         with pytest.raises(NotImplementedError):
             get_modelling_results(showcase, case.pipeline, case.baseline_pipeline)
     elif case.pipeline is None:
@@ -579,5 +578,5 @@ def test_get_modelling_results(
             get_modelling_results(showcase, case.pipeline, case.baseline_pipeline)
     else:
         x, y = get_modelling_results(showcase, case.pipeline, case.baseline_pipeline)
-        _assert_arrays(x, case.etalon_x, "x")
-        _assert_arrays(y, case.etalon_y, "y")
+        _assert_arrays(x, case.etalon_x, 'x')
+        _assert_arrays(y, case.etalon_y, 'y')
