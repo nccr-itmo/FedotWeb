@@ -17,6 +17,19 @@ from fedot.core.pipelines.pipeline import Pipeline
 from numpy.typing import NDArray
 
 
+def _assert_arrays(given: List[Any], etalon: List[Any], label: str = "x"):
+    assert len(given) == len(etalon), (
+        f"{label} length error: len({label})={len(given)} != len(etalon_{label})={len(etalon)}"
+    )
+    if given and type(given[0]) is list:
+        for idx, (giveni, etaloni) in enumerate(zip(given, etalon)):
+            assert giveni == pytest.approx(etaloni), (
+                f"Incorrect {label}{idx} mapping: {label}{idx}={giveni} != etalon_{label}{idx}={etaloni}"
+            )
+    else:
+        assert given == pytest.approx(etalon), f"Incorrect {label} mapping: {label}={given} != etalon_{label}={etalon}"
+
+
 @dataclass
 class ChartInputCase:
     x: List[int]
@@ -212,11 +225,9 @@ def test_get_quality_analytics(
     assert x and y, "MockPlotData is empty"
     assert len(x) == len(y), "x and y should have the same shape"
     etalon_x = [0, 1, 2]
-    assert len(x) == len(etalon_x), f"x length error: len(x)={len(x)} != len(etalon_x)={len(etalon_x)}"
-    assert x == etalon_x, f"Incorrect x mapping: {x=} != {etalon_x=}"
+    _assert_arrays(x, etalon_x, "x")
     etalon_y = [1.111, 3.337, 6.123]
-    assert len(y) == len(etalon_y), f"y length error: len(y)={len(y)} != len(etalon_y)={len(etalon_y)}"
-    assert y == pytest.approx(etalon_y), f"Incorrect y mapping: {y=} != {etalon_y=}"
+    _assert_arrays(y, etalon_y, "y")
 
 
 @pytest.fixture
@@ -272,11 +283,9 @@ def test_get_population_analytics(
         x, y = get_population_analytics("", case.analytic_type)
         assert x and y, "MockBoxPlotData is empty"
         assert len(x) == len(y), "x and y should have the same shape"
-        assert len(x) == len(case.etalon_x), f"x length error: len(x)={len(x)} != len(etalon_x)={len(case.etalon_x)}"
-        assert x == case.etalon_x, f"Incorrect x mapping: {x=} != {case.etalon_x=}"
-        assert len(y) == len(case.etalon_y), f"y length error: len(y)={len(y)} != len(etalon_y)={len(case.etalon_y)}"
-        for yi, etalon_yi in zip(y, case.etalon_y):
-            assert yi == pytest.approx(etalon_yi), f"Incorrect y mapping: {y=} != {case.etalon_y=}"
+        _assert_arrays(x, case.etalon_x, "x")
+        _assert_arrays(y, case.etalon_y, "y")
+
 
 
 @dataclass
@@ -488,15 +497,15 @@ GET_MODELLING_RESULTS_INPUTS = [
         task_name="ts_forecasting",
         pipeline=MockPipeline(),
         baseline_pipeline=None,
-        etalon_x=[0, 1],
-        etalon_y=[[1, 2, 3]]
+        etalon_x=[0],
+        etalon_y=[[1, 2, 3, 4, 5, 6]]
     ),
     ModellingResults(
         task_name="ts_forecasting",
-        pipeline=MockPipeline,
+        pipeline=MockPipeline(),
         baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[0, 1],
-        etalon_y=[[1, 2, 3], [10, 11, 12]]
+        etalon_x=[0],
+        etalon_y=[[1, 2, 3, 4, 5, 6], [10, 11, 12, 13, 14, 15]]
     ),
 
     ModellingResults(
@@ -539,23 +548,23 @@ def test_get_modelling_results(
     showcase_item_fixture
 ):
     @dataclass
-    class MockPipeline:
-        is_base: bool = False  # non-existing field
+    class MockPipeline:  # using non-existing fields
+        is_base: bool = False
         pass
     monkeypatch.setattr(
         "app.api.analytics.service.Pipeline", MockPipeline
     )
 
-    def mock_test_prediction_for_pipeline(case: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
+    def mock_test_prediction_for_pipeline(showcase: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
         if pipeline:
             if pipeline.is_base:
-                if case.metadata.task_name == "ts_forecasting":
-                    return None, MockOutputData(np.array([[10, 11, 12], [13, 14, 15]]))
-                return None, MockOutputData(np.array([22, 33, 44, 55, 66, 77]))
+                if showcase.metadata.task_name == "ts_forecasting":
+                    return None, MockOutputData(np.array([[10, 11, 12, 13, 14, 15]]))
+                return None, MockOutputData(np.array([[22], [33], [44], [55], [66], [77]]))
             else:
-                if case.metadata.task_name == "ts_forecasting":
-                    return None, MockOutputData(np.array([[1, 2, 3], [4, 5, 6]]))
-                return None, MockOutputData(np.array([1, 2, 3, 4, 5, 6]))
+                if showcase.metadata.task_name == "ts_forecasting":
+                    return None, MockOutputData(np.array([[1, 2, 3, 4, 5, 6]]))
+                return None, MockOutputData(np.array([[1], [2], [3], [4], [5], [6]]))
         return None, None
     monkeypatch.setattr(
         "app.api.analytics.service._test_prediction_for_pipeline", mock_test_prediction_for_pipeline
@@ -570,7 +579,5 @@ def test_get_modelling_results(
             get_modelling_results(showcase, case.pipeline, case.baseline_pipeline)
     else:
         x, y = get_modelling_results(showcase, case.pipeline, case.baseline_pipeline)
-        assert len(x) == len(case.etalon_x), f"x length error: len(x)={len(x)} != len(etalon_x)={len(case.etalon_x)}"
-        assert x == case.etalon_x, f"Incorrect x mapping: {x=} != {case.etalon_x=}"
-        assert len(y) == len(case.etalon_y), f"y length error: len(y)={len(y)} != len(etalon_y)={len(case.etalon_y)}"
-        assert y == case.etalon_y, f"Incorrect y mapping: {y=} != {case.etalon_y=}"
+        _assert_arrays(x, case.etalon_x, "x")
+        _assert_arrays(y, case.etalon_y, "y")
