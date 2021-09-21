@@ -144,7 +144,7 @@ def test_make_chart_dicts(case: ChartTestCase):
             }
         }
     _assert_arrays(result_series, correct_series, 'series')
-    _assert_arrays(result_options, correct_options, 'options')
+    _assert_arrays([result_options], [correct_options], 'options')
 
 
 @pytest.fixture
