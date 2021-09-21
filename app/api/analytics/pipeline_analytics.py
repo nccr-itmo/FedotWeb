@@ -1,10 +1,9 @@
-from fedot.core.composer.metrics import ROCAUC, RMSE, MAE, MAPE
-
-from app.api.analytics.service import _test_prediction_for_pipeline
+from app.api.analytics.service import get_prediction_for_pipeline
+from fedot.core.composer.metrics import MAE, MAPE, RMSE, ROCAUC
 
 
 def get_metrics_for_pipeline(case, pipeline) -> dict:
-    input_data, output_data = _test_prediction_for_pipeline(case, pipeline)
+    input_data, output_data = get_prediction_for_pipeline(case, pipeline)
 
     metrics = {}
     if case.metadata.task_name == 'classification':

@@ -6,9 +6,9 @@ import numpy as np
 import pytest
 from app.api.analytics.service import (_make_chart_dicts,
                                        _make_chart_dicts_for_boxplot,
-                                       _test_prediction_for_pipeline,
                                        get_modelling_results,
                                        get_population_analytics,
+                                       get_prediction_for_pipeline,
                                        get_quality_analytics)
 
 
@@ -385,7 +385,7 @@ PIPELINE_PREDICTION_TEST_CASES = [
 
 
 @pytest.mark.parametrize('case', PIPELINE_PREDICTION_TEST_CASES)
-def test_test_prediction_for_pipeline(
+def test_get_prediction_for_pipeline(
     case: PipelinePredictionTestCase,
     monkeypatch,
     showcase_item_fixture,
@@ -402,9 +402,9 @@ def test_test_prediction_for_pipeline(
     )
     if type(case.target) is str:
         with pytest.raises(ValueError):
-            _test_prediction_for_pipeline(case.showcase, case.pipeline)
+            get_prediction_for_pipeline(case.showcase, case.pipeline)
     else:
-        case.target(*_test_prediction_for_pipeline(case.showcase, case.pipeline))
+        case.target(*get_prediction_for_pipeline(case.showcase, case.pipeline))
 
 
 @dataclass
@@ -543,7 +543,7 @@ def test_get_modelling_results(
     chart_dicts_fixture,
     showcase_item_fixture
 ):
-    def mock_test_prediction_for_pipeline(showcase: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
+    def mock_get_prediction_for_pipeline(showcase: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
         if pipeline:
             if pipeline.should_return_baseline:
                 if showcase.metadata.task_name == 'ts_forecasting':
@@ -555,7 +555,7 @@ def test_get_modelling_results(
                 return None, MockOutputData(np.array([[1], [2], [3], [4], [5], [6]]))
         return None, None
     monkeypatch.setattr(
-        'app.api.analytics.service._test_prediction_for_pipeline', mock_test_prediction_for_pipeline
+        'app.api.analytics.service.get_prediction_for_pipeline', mock_get_prediction_for_pipeline
     )
 
     showcase = MockShowcaseItem(MockMetaData('', case.task_name))

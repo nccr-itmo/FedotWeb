@@ -126,7 +126,7 @@ def get_population_analytics(case_id: str, analytic_type: str) -> BoxPlotData:
     return output
 
 
-def _test_prediction_for_pipeline(
+def get_prediction_for_pipeline(
     case: ShowcaseItem, pipeline: Optional[Pipeline]
 ) -> Tuple[Optional[InputData], Optional[OutputData]]:
     test_data = get_input_data(dataset_name=case.metadata.dataset_name, sample_type='test')
@@ -146,7 +146,7 @@ def get_modelling_results(
     pipeline: Optional[Pipeline],
     baseline_pipeline: Optional[Pipeline] = None
 ) -> PlotData:
-    test_data, prediction = _test_prediction_for_pipeline(case, pipeline)
+    test_data, prediction = get_prediction_for_pipeline(case, pipeline)
 
     y_bnd: Optional[Tuple[int, int]] = None
     x_title: str
@@ -170,7 +170,7 @@ def get_modelling_results(
     y: List[Integral] = prediction.predict.ravel().astype(float).tolist()
     baseline_prediction: Optional[OutputData] = None
     if baseline_pipeline:
-        _, baseline_prediction = _test_prediction_for_pipeline(case, baseline_pipeline)
+        _, baseline_prediction = get_prediction_for_pipeline(case, baseline_pipeline)
     y_baseline: Optional[List[Integral]] = (
         baseline_prediction.predict.ravel().astype(float).tolist() if baseline_prediction else None
     )
