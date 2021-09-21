@@ -1,37 +1,34 @@
 from dataclasses import dataclass
 from re import M
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import pytest
-from _pytest.monkeypatch import monkeypatch
 from app.api.analytics.service import (_make_chart_dicts,
                                        _make_chart_dicts_for_boxplot,
                                        _test_prediction_for_pipeline,
                                        get_modelling_results,
                                        get_population_analytics,
                                        get_quality_analytics)
-from app.api.showcase.models import ShowcaseItem
-from attr.setters import pipe
-from fedot.core.pipelines.pipeline import Pipeline
-from numpy.typing import NDArray
 
 
-def _assert_arrays(given: List[Any], etalon: List[Any], label: str = 'x'):
-    assert len(given) == len(etalon), (
-        f'{label} length error: len({label})={len(given)} != len(etalon_{label})={len(etalon)}'
+def _assert_arrays(given: List[Any], correct: List[Any], label: str = 'x'):
+    assert len(given) == len(correct), (
+        f'{label} length error: len({label})={len(given)} != len(correct_{label})={len(correct)}'
     )
     if given and type(given[0]) is list:
-        for idx, (giveni, etaloni) in enumerate(zip(given, etalon)):
-            assert giveni == pytest.approx(etaloni), (
-                f'Incorrect {label}{idx} mapping: {label}{idx}={giveni} != etalon_{label}{idx}={etaloni}'
+        for idx, (giveni, correcti) in enumerate(zip(given, correct)):
+            assert giveni == pytest.approx(correcti), (
+                f'Incorrect {label}{idx} mapping: {label}{idx}={giveni} != correct_{label}{idx}={correcti}'
             )
     else:
-        assert given == pytest.approx(etalon), f'Incorrect {label} mapping: {label}={given} != etalon_{label}={etalon}'
+        assert given == pytest.approx(correct), (
+            f'Incorrect {label} mapping: {label}={given} != correct_{label}={correct}'
+        )
 
 
 @dataclass
-class ChartInputCase:
+class ChartTestCase:
     x: List[int]
     ys: List[List[Union[int, float]]]
     x_title: str
@@ -40,8 +37,8 @@ class ChartInputCase:
     y_bnd: Optional[Tuple[int, int]]
 
 
-MAKE_CHART_DICTS_INPUTS = [
-    ChartInputCase(
+CHART_TEST_CASES = [
+    ChartTestCase(
         x=[1, 2, 3],
         ys=[
             [1, 2, 3],
@@ -53,7 +50,7 @@ MAKE_CHART_DICTS_INPUTS = [
         names=['test', 'sample', 'cases'],
         y_bnd=None
     ),
-    ChartInputCase(
+    ChartTestCase(
         x=[4, 5, 6],
         ys=[
             [1.2, 2.3, 3.4],
@@ -65,7 +62,7 @@ MAKE_CHART_DICTS_INPUTS = [
         names=['test', 'sample', 'cases'],
         y_bnd=(1.14, 9.555)
     ),
-    ChartInputCase(
+    ChartTestCase(
         x=[10, 50, 100],
         ys=[
             [0.00199, 0.01999, 0.19999],
@@ -80,15 +77,15 @@ MAKE_CHART_DICTS_INPUTS = [
 ]
 
 
-@pytest.mark.parametrize('case', MAKE_CHART_DICTS_INPUTS)
-def test_make_chart_dicts_for_boxplot(case: ChartInputCase):
+@pytest.mark.parametrize('case', CHART_TEST_CASES)
+def test_make_chart_dicts_for_boxplot(case: ChartTestCase):
     result = _make_chart_dicts_for_boxplot(
         x=case.x,
         ys=case.ys,
         x_title=case.x_title,
         y_title=case.y_title
     )
-    etalon = [
+    correct = [
         {
             'y': f'Gen {case.x[idx]}',
             'x': [round(_, 3) for _ in y],
@@ -97,11 +94,11 @@ def test_make_chart_dicts_for_boxplot(case: ChartInputCase):
         }
         for idx, y in enumerate(case.ys)
     ]
-    assert result == etalon, f'Chart dicts aren\'t equal: {result} != {etalon}'
+    assert result == correct, f'Chart dicts aren\'t equal: {result} != {correct}'
 
 
-@pytest.mark.parametrize('case', MAKE_CHART_DICTS_INPUTS)
-def test_make_chart_dicts(case: ChartInputCase):
+@pytest.mark.parametrize('case', CHART_TEST_CASES)
+def test_make_chart_dicts(case: ChartTestCase):
     plot_types = ['line', 'other']
     for plot_type in plot_types:
         result_series, result_options = _make_chart_dicts(
@@ -113,7 +110,7 @@ def test_make_chart_dicts(case: ChartInputCase):
             plot_type=plot_type,
             y_bnd=case.y_bnd
         )
-        etalon_series = [
+        correct_series = [
             {
                 'name': case.names[idx1],
                 'data':
@@ -128,7 +125,7 @@ def test_make_chart_dicts(case: ChartInputCase):
             max_y: float = max(max(y) for y in case.ys) * 1.05
         else:
             min_y, max_y = case.y_bnd
-        etalon_options = {
+        correct_options = {
             'chart': {
                 'type': plot_type
             },
@@ -146,8 +143,8 @@ def test_make_chart_dicts(case: ChartInputCase):
                 'max': max_y
             }
         }
-    assert result_series == etalon_series, f'Series aren\'t equal: {result_series} != {etalon_series}'
-    assert result_options == etalon_options, f'Options aren\'t equal: {result_options} != {etalon_options}'
+    assert result_series == correct_series, f'Series aren\'t equal: {result_series} != {correct_series}'
+    assert result_options == correct_options, f'Options aren\'t equal: {result_options} != {correct_options}'
 
 
 @pytest.fixture
@@ -224,10 +221,10 @@ def test_get_quality_analytics(
     y = y[0]
     assert x and y, 'MockPlotData is empty'
     assert len(x) == len(y), 'x and y should have the same shape'
-    etalon_x = [0, 1, 2]
-    _assert_arrays(x, etalon_x, 'x')
-    etalon_y = [1.111, 3.337, 6.123]
-    _assert_arrays(y, etalon_y, 'y')
+    correct_x = [0, 1, 2]
+    _assert_arrays(x, correct_x, 'x')
+    correct_y = [1.111, 3.337, 6.123]
+    _assert_arrays(y, correct_y, 'y')
 
 
 @pytest.fixture
@@ -243,48 +240,48 @@ def box_plot_data_fixture(monkeypatch):
 
 
 @dataclass
-class PopulationAnalytics:
+class PopulationAnalyticsTestCase:
     analytic_type: str
-    etalon_x: List[int]
-    etalon_y: List[Any]
+    correct_x: List[int]
+    correct_y: List[Any]
 
 
-GET_POPULATION_ANALYTICS_INPUTS = [
-    PopulationAnalytics(
+POPULATION_ANALYTICS_TEST_CASES = [
+    PopulationAnalyticsTestCase(
         analytic_type='pheno',
-        etalon_x=[0, 1, 2],
-        etalon_y=[[1.1111, 2.2229999], [3.3366], [5.54321, 6.123456, 10.54346]]
+        correct_x=[0, 1, 2],
+        correct_y=[[1.1111, 2.2229999], [3.3366], [5.54321, 6.123456, 10.54346]]
     ),
-    PopulationAnalytics(
+    PopulationAnalyticsTestCase(
         analytic_type='geno',
-        etalon_x=[0, 1, 2],
-        etalon_y=[[1, 4], [9], [25, 36, 100]]
+        correct_x=[0, 1, 2],
+        correct_y=[[1, 4], [9], [25, 36, 100]]
     ),
-    PopulationAnalytics(
+    PopulationAnalyticsTestCase(
         analytic_type='exception',
-        etalon_x=[],
-        etalon_y=[]
+        correct_x=[],
+        correct_y=[]
     )
 ]
 
 
-@pytest.mark.parametrize('case', GET_POPULATION_ANALYTICS_INPUTS)
+@pytest.mark.parametrize('case', POPULATION_ANALYTICS_TEST_CASES)
 def test_get_population_analytics(
-    case: PopulationAnalytics,
+    case: PopulationAnalyticsTestCase,
     monkeypatch,
     composer_history_for_case_fixture,
     chart_dicts_fixture,
     box_plot_data_fixture
 ):
-    if case.analytic_type == 'exception' and not case.etalon_x and not case.etalon_y:
+    if case.analytic_type == 'exception' and not case.correct_x and not case.correct_y:
         with pytest.raises(ValueError):
             get_population_analytics('', case.analytic_type)
     else:
         x, y = get_population_analytics('', case.analytic_type)
         assert x and y, 'MockBoxPlotData is empty'
         assert len(x) == len(y), 'x and y should have the same shape'
-        _assert_arrays(x, case.etalon_x, 'x')
-        _assert_arrays(y, case.etalon_y, 'y')
+        _assert_arrays(x, case.correct_x, 'x')
+        _assert_arrays(y, case.correct_y, 'y')
 
 
 @dataclass
@@ -312,7 +309,7 @@ class MockInputData:
 
 @dataclass
 class MockOutputData:
-    predict: NDArray = None
+    predict: np.ndarray = None
 
 
 @pytest.fixture
@@ -328,7 +325,7 @@ def input_output_data_fixture(monkeypatch):
 @dataclass
 class MockPipeline:
     is_fitted: bool = False
-    is_base: bool = False  # non-existing field
+    should_return_baseline: bool = False  # non-existing field
 
     def fit(self, *args, **kwargs):
         self.is_fitted = True
@@ -347,39 +344,39 @@ def pipeline_fixture(monkeypatch):
 
 
 @dataclass
-class PredictionForPipeline:
+class PipelinePredictionTestCase:
     showcase: MockShowcaseItem
     pipeline: Optional[MockPipeline]
     target: Union[str, Callable[[Any], Any]]
 
 
-TEST_PREDICTION_FOR_PIPELINE_INPUTS = [
-    PredictionForPipeline(
+PIPELINE_PREDICTION_TEST_CASES = [
+    PipelinePredictionTestCase(
         showcase=MockShowcaseItem(MockMetaData(dataset_name=None)),
         pipeline=None,
         target=lambda test_data, prediction: test_data is None and prediction is None
     ),
-    PredictionForPipeline(
+    PipelinePredictionTestCase(
         showcase=MockShowcaseItem(MockMetaData(dataset_name=None)),
         pipeline=MockPipeline(),
         target='exception'
     ),
-    PredictionForPipeline(
+    PipelinePredictionTestCase(
         showcase=MockShowcaseItem(MockMetaData(dataset_name=None)),
         pipeline=MockPipeline(is_fitted=True),
         target=lambda test_data, prediction: test_data is None and prediction is None
     ),
-    PredictionForPipeline(
+    PipelinePredictionTestCase(
         showcase=MockShowcaseItem(),
         pipeline=None,
         target=lambda test_data, prediction: type(test_data) is MockInputData and prediction is None
     ),
-    PredictionForPipeline(
+    PipelinePredictionTestCase(
         showcase=MockShowcaseItem(),
         pipeline=MockPipeline(),
         target=lambda test_data, prediction: type(test_data) is MockInputData and type(prediction) is MockOutputData
     ),
-    PredictionForPipeline(
+    PipelinePredictionTestCase(
         showcase=MockShowcaseItem(),
         pipeline=MockPipeline(is_fitted=True),
         target=lambda test_data, prediction: type(test_data) is MockInputData and type(prediction) is MockOutputData
@@ -387,9 +384,9 @@ TEST_PREDICTION_FOR_PIPELINE_INPUTS = [
 ]
 
 
-@pytest.mark.parametrize('case', TEST_PREDICTION_FOR_PIPELINE_INPUTS)
+@pytest.mark.parametrize('case', PIPELINE_PREDICTION_TEST_CASES)
 def test_test_prediction_for_pipeline(
-    case: PredictionForPipeline,
+    case: PipelinePredictionTestCase,
     monkeypatch,
     showcase_item_fixture,
     input_output_data_fixture,
@@ -411,152 +408,144 @@ def test_test_prediction_for_pipeline(
 
 
 @dataclass
-class ModellingResults:
+class ModelResultsTestCase:
     task_name: str
     pipeline: Optional[MockPipeline]
     baseline_pipeline: Optional[MockPipeline]
-    etalon_x: List[int]
-    etalon_y: List[Any]
+    correct_x: List[int]
+    correct_y: List[Any]
 
 
-GET_MODELLING_RESULTS_INPUTS = [
-    ModellingResults(
+MODEL_RESULTS_TEST_CASES = [
+    ModelResultsTestCase(
         task_name='classification',
         pipeline=None,
         baseline_pipeline=None,
-        etalon_x=[],
-        etalon_y=[]
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='classification',
         pipeline=None,
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[],
-        etalon_y=[]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='classification',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
-        etalon_x=[0, 1, 2, 3, 4, 5],
-        etalon_y=[[1, 2, 3, 4, 5, 6]]
+        correct_x=[0, 1, 2, 3, 4, 5],
+        correct_y=[[1, 2, 3, 4, 5, 6]]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='classification',
         pipeline=MockPipeline(),
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[0, 1, 2, 3, 4, 5],
-        etalon_y=[[1, 2, 3, 4, 5, 6], [22, 33, 44, 55, 66, 77]]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[0, 1, 2, 3, 4, 5],
+        correct_y=[[1, 2, 3, 4, 5, 6], [22, 33, 44, 55, 66, 77]]
     ),
 
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='regression',
         pipeline=None,
         baseline_pipeline=None,
-        etalon_x=[],
-        etalon_y=[]
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='regression',
         pipeline=None,
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[],
-        etalon_y=[]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='regression',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
-        etalon_x=[0, 1, 2, 3, 4, 5],
-        etalon_y=[[1, 2, 3, 4, 5, 6]]
+        correct_x=[0, 1, 2, 3, 4, 5],
+        correct_y=[[1, 2, 3, 4, 5, 6]]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='regression',
         pipeline=MockPipeline,
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[0, 1, 2, 3, 4, 5],
-        etalon_y=[[1, 2, 3, 4, 5, 6], [22, 33, 44, 55, 66, 77]]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[0, 1, 2, 3, 4, 5],
+        correct_y=[[1, 2, 3, 4, 5, 6], [22, 33, 44, 55, 66, 77]]
     ),
 
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='ts_forecasting',
         pipeline=None,
         baseline_pipeline=None,
-        etalon_x=[],
-        etalon_y=[]
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='ts_forecasting',
         pipeline=None,
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[],
-        etalon_y=[]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='ts_forecasting',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
-        etalon_x=[0],
-        etalon_y=[[1, 2, 3, 4, 5, 6]]
+        correct_x=[0],
+        correct_y=[[1, 2, 3, 4, 5, 6]]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='ts_forecasting',
         pipeline=MockPipeline(),
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[0],
-        etalon_y=[[1, 2, 3, 4, 5, 6], [10, 11, 12, 13, 14, 15]]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[0],
+        correct_y=[[1, 2, 3, 4, 5, 6], [10, 11, 12, 13, 14, 15]]
     ),
 
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='exception',
         pipeline=None,
         baseline_pipeline=None,
-        etalon_x=[],
-        etalon_y=[]
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='exception',
         pipeline=None,
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[],
-        etalon_y=[]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='exception',
         pipeline=MockPipeline(),
         baseline_pipeline=None,
-        etalon_x=[],
-        etalon_y=[]
+        correct_x=[],
+        correct_y=[]
     ),
-    ModellingResults(
+    ModelResultsTestCase(
         task_name='exception',
         pipeline=MockPipeline(),
-        baseline_pipeline=MockPipeline(is_base=True),
-        etalon_x=[],
-        etalon_y=[]
+        baseline_pipeline=MockPipeline(should_return_baseline=True),
+        correct_x=[],
+        correct_y=[]
     ),
 ]
 
 
-@pytest.mark.parametrize('case', GET_MODELLING_RESULTS_INPUTS)
+@pytest.mark.parametrize('case', MODEL_RESULTS_TEST_CASES)
 def test_get_modelling_results(
-    case: ModellingResults,
+    case: ModelResultsTestCase,
     monkeypatch,
     plot_data_fixture,
     chart_dicts_fixture,
     showcase_item_fixture
 ):
-    @dataclass
-    class MockPipeline:  # using non-existing fields
-        is_base: bool = False
-        pass
-    monkeypatch.setattr(
-        'app.api.analytics.service.Pipeline', MockPipeline
-    )
-
     def mock_test_prediction_for_pipeline(showcase: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
         if pipeline:
-            if pipeline.is_base:
+            if pipeline.should_return_baseline:
                 if showcase.metadata.task_name == 'ts_forecasting':
                     return None, MockOutputData(np.array([[10, 11, 12, 13, 14, 15]]))
                 return None, MockOutputData(np.array([[22], [33], [44], [55], [66], [77]]))
@@ -578,5 +567,5 @@ def test_get_modelling_results(
             get_modelling_results(showcase, case.pipeline, case.baseline_pipeline)
     else:
         x, y = get_modelling_results(showcase, case.pipeline, case.baseline_pipeline)
-        _assert_arrays(x, case.etalon_x, 'x')
-        _assert_arrays(y, case.etalon_y, 'y')
+        _assert_arrays(x, case.correct_x, 'x')
+        _assert_arrays(y, case.correct_y, 'y')
