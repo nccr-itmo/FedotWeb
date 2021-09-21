@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from re import M
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 import numpy as np
@@ -10,6 +9,14 @@ from app.api.analytics.service import (_make_chart_dicts,
                                        get_population_analytics,
                                        get_prediction_for_pipeline,
                                        get_quality_analytics)
+
+from .fixtures.analytics_service_fixtures import (
+    box_plot_data_fixture, chart_dicts_fixture,
+    composer_history_for_case_fixture, input_output_data_fixture,
+    pipeline_fixture, plot_data_fixture, showcase_item_fixture)
+from .mocks.analytics_service_mocks import (MockInputData, MockMetaData,
+                                            MockOutputData, MockPipeline,
+                                            MockShowcaseItem)
 
 
 def _assert_arrays(given: List[Any], correct: List[Any], label: str = 'x'):
@@ -147,71 +154,6 @@ def test_make_chart_dicts(case: ChartTestCase):
     _assert_arrays([result_options], [correct_options], 'options')
 
 
-@pytest.fixture
-def plot_data_fixture(monkeypatch):
-    @dataclass
-    class MockPlotData:
-        series: list
-        options: list
-
-        def __iter__(self):
-            return iter((self.series, self.options))
-
-    monkeypatch.setattr('app.api.analytics.service.PlotData', MockPlotData)
-
-
-@dataclass
-class MockIndividualGraph:
-    depth: int
-
-
-@dataclass
-class MockIndividual:
-    fitness: float
-    graph: MockIndividualGraph = None
-
-
-@dataclass
-class MockOptHistory:
-    individuals: list
-
-
-@pytest.fixture
-def composer_history_for_case_fixture(monkeypatch):
-    individuals = [
-        [
-            MockIndividual(fitness, MockIndividualGraph(depth))
-            for fitness, depth in ind_lst
-        ]
-        for ind_lst in [
-            [(1.1111, 1), (2.2229999, 4)],
-            [(3.3366, 9)],
-            [(5.54321, 25), (-6.123456, 36), (10.54346, 100)]
-        ]
-    ]
-
-    def mock_composer_history_for_case(case_id: str):
-        return MockOptHistory(individuals)
-    monkeypatch.setattr(
-        'app.api.analytics.service.composer_history_for_case', mock_composer_history_for_case
-    )
-
-
-@pytest.fixture
-def chart_dicts_fixture(monkeypatch):
-    def mock_make_chart_dicts(x, ys, *args, **kwargs):
-        return x, ys
-    monkeypatch.setattr(
-        'app.api.analytics.service._make_chart_dicts', mock_make_chart_dicts
-    )
-
-    def mock_make_chart_dicts_for_boxplot(x, ys, *args, **kwargs) -> Tuple[list, list]:
-        return x, ys
-    monkeypatch.setattr(
-        'app.api.analytics.service._make_chart_dicts_for_boxplot', mock_make_chart_dicts_for_boxplot
-    )
-
-
 def test_get_quality_analytics(
     plot_data_fixture,
     composer_history_for_case_fixture,
@@ -225,18 +167,6 @@ def test_get_quality_analytics(
     _assert_arrays(x, correct_x, 'x')
     correct_y = [1.111, 3.337, 6.123]
     _assert_arrays(y, correct_y, 'y')
-
-
-@pytest.fixture
-def box_plot_data_fixture(monkeypatch):
-    @dataclass
-    class MockBoxPlotData:
-        series: Tuple[list, list]
-
-        def __iter__(self):
-            return iter(self.series)
-
-    monkeypatch.setattr('app.api.analytics.service.BoxPlotData', MockBoxPlotData)
 
 
 @dataclass
@@ -282,65 +212,6 @@ def test_get_population_analytics(
         assert len(x) == len(y), 'x and y should have the same shape'
         _assert_arrays(x, case.correct_x, 'x')
         _assert_arrays(y, case.correct_y, 'y')
-
-
-@dataclass
-class MockMetaData:
-    dataset_name: str = ''
-    task_name: str = ''
-
-
-@dataclass
-class MockShowcaseItem:
-    metadata: MockMetaData = MockMetaData()
-
-
-@pytest.fixture
-def showcase_item_fixture(monkeypatch):
-    monkeypatch.setattr(
-        'app.api.analytics.service.ShowcaseItem', MockShowcaseItem
-    )
-
-
-@dataclass
-class MockInputData:
-    pass
-
-
-@dataclass
-class MockOutputData:
-    predict: np.ndarray = None
-
-
-@pytest.fixture
-def input_output_data_fixture(monkeypatch):
-    monkeypatch.setattr(
-        'app.api.analytics.service.InputData', MockInputData
-    )
-    monkeypatch.setattr(
-        'app.api.analytics.service.OutputData', MockOutputData
-    )
-
-
-@dataclass
-class MockPipeline:
-    is_fitted: bool = False
-    should_return_baseline: bool = False  # non-existing field
-
-    def fit(self, *args, **kwargs):
-        self.is_fitted = True
-
-    def predict(self, *args, **kwargs):
-        if not self.is_fitted:
-            raise ValueError()
-        return MockOutputData()
-
-
-@pytest.fixture
-def pipeline_fixture(monkeypatch):
-    monkeypatch.setattr(
-        'app.api.analytics.service.Pipeline', MockPipeline
-    )
 
 
 @dataclass
