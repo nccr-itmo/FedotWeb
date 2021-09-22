@@ -536,7 +536,6 @@ POPULATION_ANALYTICS_TEST_CASES = [
 @pytest.mark.parametrize('case', POPULATION_ANALYTICS_TEST_CASES)
 def test_get_population_analytics(
     case: PopulationAnalyticsTestCase,
-    monkeypatch,
     box_plot_data_fixture,
     make_chart_dicts_fixture,
     composer_history_for_case_fixture,
@@ -596,7 +595,6 @@ PIPELINE_PREDICTION_TEST_CASES = [
 @pytest.mark.parametrize('case', PIPELINE_PREDICTION_TEST_CASES)
 def test_get_prediction_for_pipeline(
     case: PipelinePredictionTestCase,
-    monkeypatch,
     pipeline_fixture,
     showcase_item_fixture,
     make_chart_dicts_fixture,
@@ -740,7 +738,6 @@ MODEL_RESULTS_TEST_CASES = [
 @pytest.mark.parametrize('case', MODEL_RESULTS_TEST_CASES)
 def test_get_modelling_results(
     case: ModelResultsTestCase,
-    monkeypatch,
     plot_data_fixture,
     showcase_item_fixture,
     make_chart_dicts_fixture,
