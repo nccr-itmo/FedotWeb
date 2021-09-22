@@ -13,9 +13,9 @@ from app.api.analytics.service import (_make_chart_dicts,
 from pandas.testing import assert_series_equal
 
 from .fixtures.analytics_service_fixtures import (
-    box_plot_data_fixture, chart_dicts_fixture,
-    composer_history_for_case_fixture, input_output_data_fixture,
-    pipeline_fixture, plot_data_fixture, showcase_item_fixture)
+    box_plot_data_fixture, composer_history_for_case_fixture,
+    input_output_data_fixture, make_chart_dicts_fixture, pipeline_fixture,
+    pipeline_prediction_fixture, plot_data_fixture, showcase_item_fixture)
 from .mocks.analytics_service_mocks import (MockInputData, MockMetaData,
                                             MockOutputData, MockPipeline,
                                             MockShowcaseItem)
@@ -495,7 +495,7 @@ def test_make_chart_dicts(case: ChartTestCase):
 def test_get_quality_analytics(
     plot_data_fixture,
     composer_history_for_case_fixture,
-    chart_dicts_fixture
+    make_chart_dicts_fixture
 ):
     x, y = get_quality_analytics('_')
     y = y[0]
@@ -537,9 +537,9 @@ POPULATION_ANALYTICS_TEST_CASES = [
 def test_get_population_analytics(
     case: PopulationAnalyticsTestCase,
     monkeypatch,
+    box_plot_data_fixture,
+    make_chart_dicts_fixture,
     composer_history_for_case_fixture,
-    chart_dicts_fixture,
-    box_plot_data_fixture
 ):
     if case.analytic_type == 'exception' and not case.correct_x and not case.correct_y:
         with pytest.raises(ValueError):
@@ -597,19 +597,12 @@ PIPELINE_PREDICTION_TEST_CASES = [
 def test_get_prediction_for_pipeline(
     case: PipelinePredictionTestCase,
     monkeypatch,
+    pipeline_fixture,
     showcase_item_fixture,
+    make_chart_dicts_fixture,
     input_output_data_fixture,
-    chart_dicts_fixture,
-    pipeline_fixture
 ):
-    def mock_get_input_data(*args, **kwargs):
-        if kwargs['dataset_name'] is None:
-            return None
-        return MockInputData()
-    monkeypatch.setattr(
-        'app.api.analytics.service.get_input_data', mock_get_input_data
-    )
-    if type(case.target) is str:
+    if type(case.target) is str and case.target == 'exception':
         with pytest.raises(ValueError):
             get_prediction_for_pipeline(case.showcase, case.pipeline)
     else:
@@ -749,24 +742,10 @@ def test_get_modelling_results(
     case: ModelResultsTestCase,
     monkeypatch,
     plot_data_fixture,
-    chart_dicts_fixture,
-    showcase_item_fixture
+    showcase_item_fixture,
+    make_chart_dicts_fixture,
+    pipeline_prediction_fixture
 ):
-    def mock_get_prediction_for_pipeline(showcase: MockShowcaseItem, pipeline: MockPipeline, *args, **kwargs):
-        if pipeline:
-            if pipeline.should_return_baseline:
-                if showcase.metadata.task_name == 'ts_forecasting':
-                    return None, MockOutputData(np.array([[10, 11, 12, 13, 14, 15]]))
-                return None, MockOutputData(np.array([[22], [33], [44], [55], [66], [77]]))
-            else:
-                if showcase.metadata.task_name == 'ts_forecasting':
-                    return None, MockOutputData(np.array([[1, 2, 3, 4, 5, 6]]))
-                return None, MockOutputData(np.array([[1], [2], [3], [4], [5], [6]]))
-        return None, None
-    monkeypatch.setattr(
-        'app.api.analytics.service.get_prediction_for_pipeline', mock_get_prediction_for_pipeline
-    )
-
     showcase = MockShowcaseItem(MockMetaData('', case.task_name))
     if case.task_name == 'exception':
         with pytest.raises(NotImplementedError):
