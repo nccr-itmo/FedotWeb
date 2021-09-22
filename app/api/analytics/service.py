@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import numpy.typing as npt
 from app.api.composer.service import composer_history_for_case
 from app.api.data.service import get_input_data
 from app.api.showcase.models import ShowcaseItem
