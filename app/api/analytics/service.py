@@ -193,6 +193,11 @@ def get_modelling_results(
         ys.append(y_obs[:max_items_in_plot])
         names.append('Observations')
 
+    if plot_type != 'line':
+        for y in ys:
+            if len(y) != len(x):
+                raise ValueError(f'Inner lists must have the same size: {x=} size differs from {y=}')
+
     series, options = _make_chart_dicts(x=x, ys=ys, names=names,
                                         x_title=x_title, y_title=y_title,
                                         plot_type=plot_type, y_bnd=y_bnd)
