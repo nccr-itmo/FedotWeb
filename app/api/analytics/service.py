@@ -166,7 +166,14 @@ def get_modelling_results(
         plot_type = 'line'
     else:
         plot_type = 'scatter'
-    y: List[Integral] = prediction.predict.ravel().astype(float).tolist()
+    x: List[int]
+    y: List[Integral]
+    first_predictions = getattr(prediction, 'predict', None)
+    if first_predictions is not None:
+        x = [idx for idx, _ in enumerate(first_predictions[:max_items_in_plot])]
+        y = first_predictions.ravel().astype(float).tolist()
+    else:
+        raise AttributeError()  # TODO: message
     baseline_prediction: Optional[OutputData] = None
     if baseline_pipeline:
         _, baseline_prediction = get_prediction_for_pipeline(case, baseline_pipeline)
@@ -177,7 +184,6 @@ def get_modelling_results(
         test_data.target.ravel().astype(float).tolist() if getattr(test_data, 'target', None) is not None else None
     )
 
-    x: List[int] = [idx for idx, _ in enumerate(prediction.predict[:max_items_in_plot])]
     y = y[:max_items_in_plot]
     ys: List[List[Integral]] = [y]
     names: List[str] = ['Candidate']
