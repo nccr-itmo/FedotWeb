@@ -184,16 +184,13 @@ def get_modelling_results(
         test_data.target.ravel().astype(float).tolist() if getattr(test_data, 'target', None) is not None else None
     )
 
-    y = y[:max_items_in_plot]
-    ys: List[List[Integral]] = [y]
+    ys: List[List[Integral]] = [y[:max_items_in_plot]]
     names: List[str] = ['Candidate']
     if baseline_prediction:
-        y_baseline = y_baseline[:max_items_in_plot]
-        ys.append(y_baseline)
+        ys.append(y_baseline[:max_items_in_plot])
         names.append('Baseline')
     if y_obs is not None:
-        y_obs = y_obs[:max_items_in_plot]
-        ys.append(y_obs)
+        ys.append(y_obs[:max_items_in_plot])
         names.append('Observations')
 
     series, options = _make_chart_dicts(x=x, ys=ys, names=names,
